@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "942408037240",
+    "project_id": "tollswift-bd-6194f",
+    "storage_bucket": "tollswift-bd-6194f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942408037240:android:4846c8a60d65a666c9ce8d",
+        "android_client_info": {
+          "package_name": "com.example.tollswift_bd"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942408037240-959ur4vu9kh8n4ah0dccggo02ku16581.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1Lv4v2tnSWqyvO6MQO2NhAZoG5P8l2ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942408037240-959ur4vu9kh8n4ah0dccggo02ku16581.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:942408037240:android:24a9e1a471a4f419c9ce8d",
+        "android_client_info": {
+          "package_name": "com.tollswiftbd.tollswift"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "942408037240-959ur4vu9kh8n4ah0dccggo02ku16581.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1Lv4v2tnSWqyvO6MQO2NhAZoG5P8l2ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "942408037240-959ur4vu9kh8n4ah0dccggo02ku16581.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

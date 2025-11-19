@@ -1,0 +1,6 @@
+Planned steps:
+1. Run `flutter pub get` to install dependencies.
+2. Run `flutter pub run build_runner build --delete-conflicting-outputs` to generate freezed/json serialization files.
+3. Re-run `flutter analyze --no-fatal-infos` and fix remaining issues.
+4. If generation fails, create minimal stubs for missing generated files (VehicleEntity etc).
+5. Re-run analyze and report.
