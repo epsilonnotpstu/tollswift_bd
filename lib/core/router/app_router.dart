@@ -54,8 +54,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/otp',
         builder: (_, state) => OtpVerifyScreen(
-          verificationId: state.uri.queryParameters['vid'] ?? '',
-          phone: state.uri.queryParameters['phone'] ?? '',
+          verificationId: Uri.decodeQueryComponent(
+            state.uri.queryParameters['vid'] ?? '',
+          ),
+          phone: Uri.decodeQueryComponent(
+            state.uri.queryParameters['phone'] ?? '',
+          ),
         ),
       ),
       GoRoute(

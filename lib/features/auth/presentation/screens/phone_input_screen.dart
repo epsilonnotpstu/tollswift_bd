@@ -43,8 +43,22 @@ class _PhoneInputScreenState extends ConsumerState<PhoneInputScreen> {
       return;
     }
 
+    final fullPhone = Validators.toBdE164(phone);
+    if (fullPhone == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            language == 'bn'
+                ? 'সঠিক মোবাইল নম্বর দিন'
+                : 'Enter a valid mobile number',
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _loading = true);
-    final fullPhone = '+880$phone';
+    final encodedPhone = Uri.encodeQueryComponent(fullPhone);
     await ref.read(authRepositoryProvider).verifyPhoneNumber(
           phoneNumber: fullPhone,
           verificationCompleted: (credential) async {
@@ -62,7 +76,9 @@ class _PhoneInputScreenState extends ConsumerState<PhoneInputScreen> {
           codeSent: (verificationId, resendToken) {
             if (!mounted) return;
             setState(() => _loading = false);
-            context.push('/otp?vid=$verificationId&phone=$fullPhone');
+            final encodedVerificationId =
+                Uri.encodeQueryComponent(verificationId);
+            context.push('/otp?vid=$encodedVerificationId&phone=$encodedPhone');
           },
           codeAutoRetrievalTimeout: (_) {
             if (!mounted) return;
@@ -186,7 +202,7 @@ class _PhoneInputScreenState extends ConsumerState<PhoneInputScreen> {
                             child: TextField(
                               controller: _phoneController,
                               keyboardType: TextInputType.number,
-                              maxLength: 10,
+                              maxLength: 11,
                               autofocus: true,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
@@ -201,8 +217,8 @@ class _PhoneInputScreenState extends ConsumerState<PhoneInputScreen> {
                                 counterText: '',
                                 border: InputBorder.none,
                                 hintText: language == 'bn'
-                                    ? '1XXXXXXXXX'
-                                    : '1XXXXXXXXX',
+                                    ? '01XXXXXXXXX'
+                                    : '01XXXXXXXXX',
                                 hintStyle: AppTextStyles.amountSmall.copyWith(
                                   color: AppColors.textHint,
                                 ),

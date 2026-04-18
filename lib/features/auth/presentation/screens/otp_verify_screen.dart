@@ -112,8 +112,11 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
           },
           codeSent: (verificationId, resendToken) {
             if (!mounted) return;
+            final encodedVerificationId =
+                Uri.encodeQueryComponent(verificationId);
+            final encodedPhone = Uri.encodeQueryComponent(widget.phone);
             context.pushReplacement(
-              '/otp?vid=$verificationId&phone=${widget.phone}',
+              '/otp?vid=$encodedVerificationId&phone=$encodedPhone',
             );
           },
           codeAutoRetrievalTimeout: (_) {},

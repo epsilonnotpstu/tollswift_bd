@@ -9,7 +9,6 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../vehicle/presentation/providers/vehicle_provider.dart';
-import '../../domain/toll_gate_model.dart';
 import '../providers/toll_provider.dart';
 
 class ScanQrScreen extends ConsumerStatefulWidget {
@@ -46,6 +45,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
       if (!mounted) return;
       setState(() => _processing = false);
       await _controller.start();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.toString())),
       );

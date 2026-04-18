@@ -47,6 +47,7 @@ export const addVehicle = functions.https.onCall(async (rawData, context) => {
   }
 
   const vehicleRef = admin.firestore().collection("vehicles").doc();
+  const needsManualReview = !data.brtcVerified;
   const now = admin.firestore.FieldValue.serverTimestamp();
 
   await vehicleRef.set({
@@ -66,6 +67,20 @@ export const addVehicle = functions.https.onCall(async (rawData, context) => {
     created_at: now,
     updated_at: now,
   });
+
+  if (needsManualReview) {
+    const notificationRef = admin.firestore().collection("admin_notifications").doc();
+    await notificationRef.set({
+      id: notificationRef.id,
+      type: "vehicle_manual_review",
+      user_id: userId,
+      vehicle_id: vehicleRef.id,
+      plate_number: plateNumber,
+      status: "open",
+      created_at: now,
+      updated_at: now,
+    });
+  }
 
   return { vehicleId: vehicleRef.id };
 });

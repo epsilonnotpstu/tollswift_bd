@@ -1,9 +1,26 @@
 class Validators {
-  static bool isValidBdPhone(String input) {
-    final normalized = input.replaceAll(RegExp(r'\D'), '');
+  static String? normalizeBdPhone(String input) {
+    var normalized = input.replaceAll(RegExp(r'\D'), '');
+    if (normalized.startsWith('880')) {
+      normalized = normalized.substring(3);
+    }
+    if (normalized.startsWith('0')) {
+      normalized = normalized.substring(1);
+    }
+    if (RegExp(r'^1[3-9]\d{8}$').hasMatch(normalized)) {
+      return normalized;
+    }
+    return null;
+  }
 
-    // Support both local input (1XXXXXXXXX) and full local format (01XXXXXXXXX).
-    return RegExp(r'^(?:01[3-9]\d{8}|1[3-9]\d{8})$').hasMatch(normalized);
+  static bool isValidBdPhone(String input) {
+    return normalizeBdPhone(input) != null;
+  }
+
+  static String? toBdE164(String input) {
+    final localNumber = normalizeBdPhone(input);
+    if (localNumber == null) return null;
+    return '+880$localNumber';
   }
 
   static String? phoneValidationMessage(
@@ -15,8 +32,8 @@ class Validators {
     }
     if (!isValidBdPhone(input)) {
       return language == 'bn'
-          ? 'সঠিক ১০ ডিজিটের নম্বর দিন'
-          : 'Enter a valid 10-digit BD number';
+          ? 'সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)'
+          : 'Enter a valid BD mobile number (01XXXXXXXXX)';
     }
     return null;
   }

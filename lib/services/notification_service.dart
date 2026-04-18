@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -13,6 +14,13 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin;
 
   Future<void> initialize() async {
+    // Firebase Messaging is only supported on mobile targets in this app.
+    if (kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.android &&
+            defaultTargetPlatform != TargetPlatform.iOS)) {
+      return;
+    }
+
     await _messaging.requestPermission();
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
