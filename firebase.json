@@ -1,10 +1,31 @@
 {
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20"
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  }
+	"functions": {
+		"source": "functions",
+		"runtime": "nodejs20"
+	},
+	"firestore": {
+		"rules": "firestore.rules",
+		"indexes": "firestore.indexes.json"
+	},
+	"flutter": {
+		"platforms": {
+			"android": {
+				"default": {
+					"projectId": "tollbd",
+					"appId": "1:125386761920:android:d8e11b34699a814484af25",
+					"fileOutput": "android/app/google-services.json"
+				}
+			},
+			"dart": {
+				"lib/firebase_options.dart": {
+					"projectId": "tollbd",
+					"configurations": {
+						"android": "1:125386761920:android:d8e11b34699a814484af25",
+						"ios": "1:125386761920:ios:4c0f5740b802a3f884af25",
+						"web": "1:125386761920:web:1506c9983a1279b284af25"
+					}
+				}
+			}
+		}
+	}
 }
