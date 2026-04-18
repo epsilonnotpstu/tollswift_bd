@@ -1,0 +1,285 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../features/auth/presentation/screens/biometric_setup_screen.dart';
+import '../../features/auth/presentation/screens/language_select_screen.dart';
+import '../../features/auth/presentation/screens/otp_verify_screen.dart';
+import '../../features/auth/presentation/screens/phone_input_screen.dart';
+import '../../features/auth/presentation/screens/profile_setup_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/home/presentation/screens/notification_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/settings_screen.dart';
+import '../../features/wallet/presentation/screens/add_money_screen.dart';
+import '../../features/wallet/presentation/screens/payment_failed_screen.dart';
+import '../../features/wallet/presentation/screens/payment_success_screen.dart';
+import '../../features/wallet/presentation/screens/receipt_screen.dart';
+import '../../features/wallet/presentation/screens/sslcommerz_webview_screen.dart';
+import '../../features/wallet/presentation/screens/transaction_history_screen.dart';
+import '../../features/wallet/presentation/screens/wallet_screen.dart';
+import '../constants/app_colors.dart';
+import '../constants/app_spacing.dart';
+import '../constants/app_strings.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+
+final appRouterProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: '/splash',
+    routes: [
+      GoRoute(path: '/', redirect: (_, __) => '/splash'),
+      GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
+      GoRoute(
+        path: '/language',
+        builder: (_, __) => const LanguageSelectScreen(),
+      ),
+      GoRoute(path: '/phone', builder: (_, __) => const PhoneInputScreen()),
+      GoRoute(
+        path: '/otp',
+        builder: (_, state) => OtpVerifyScreen(
+          verificationId: state.uri.queryParameters['vid'] ?? '',
+          phone: state.uri.queryParameters['phone'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/profile-setup',
+        builder: (_, __) => const ProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: '/biometric-setup',
+        builder: (_, state) => BiometricSetupScreen(
+          mode: state.uri.queryParameters['mode'] ?? 'setup',
+        ),
+      ),
+      GoRoute(path: '/wallet', builder: (_, __) => const WalletScreen()),
+      GoRoute(
+        path: '/wallet/add',
+        builder: (_, state) =>
+            AddMoneyScreen(errorMessage: state.uri.queryParameters['error']),
+      ),
+      GoRoute(
+        path: '/wallet/webview',
+        builder: (_, state) => SSLCommerzWebviewScreen(
+          url: Uri.decodeComponent(state.uri.queryParameters['url'] ?? ''),
+          transactionId: state.uri.queryParameters['txId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/wallet/payment-success',
+        builder: (_, state) => PaymentSuccessScreen(
+          transactionId: state.uri.queryParameters['txId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/wallet/payment-failed',
+        builder: (_, state) => PaymentFailedScreen(
+          transactionId: state.uri.queryParameters['txId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/wallet/history',
+        builder: (_, __) => const TransactionHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/wallet/receipt',
+        builder: (_, state) => ReceiptScreen(
+          transactionId: state.uri.queryParameters['txId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (_, __) => const NotificationScreen(),
+      ),
+      GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+      ShellRoute(
+        builder: (context, state, child) =>
+            MainNavScaffold(location: state.uri.path, child: child),
+        routes: [
+          GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
+          GoRoute(
+            path: '/pay',
+            builder: (_, __) => const _ComingSoonScreen(tab: 'pay_toll'),
+          ),
+          GoRoute(
+            path: '/vehicles',
+            builder: (_, __) => const _ComingSoonScreen(tab: 'vehicles'),
+          ),
+          GoRoute(
+            path: '/history',
+            builder: (_, __) =>
+                const TransactionHistoryScreen(showAppBar: false),
+          ),
+          GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
+        ],
+      ),
+    ],
+  );
+});
+
+class MainNavScaffold extends ConsumerWidget {
+  const MainNavScaffold({
+    super.key,
+    required this.location,
+    required this.child,
+  });
+
+  final String location;
+  final Widget child;
+
+  int get currentIndex {
+    if (location.startsWith('/home')) return 0;
+    if (location.startsWith('/pay')) return 1;
+    if (location.startsWith('/vehicles')) return 2;
+    if (location.startsWith('/history')) return 3;
+    if (location.startsWith('/profile')) return 4;
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final language = ref.watch(languageProvider);
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: AppColors.cardBorder)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _NavItem(
+                  active: currentIndex == 0,
+                  icon: Icons.home_rounded,
+                  label: AppStrings.get('app_name', language) == 'TollBD' &&
+                          language == 'bn'
+                      ? 'হোম'
+                      : 'Home',
+                  onTap: () => context.go('/home'),
+                ),
+                _NavItem(
+                  active: currentIndex == 1,
+                  icon: Icons.toll_rounded,
+                  label: AppStrings.get('pay_toll', language),
+                  center: true,
+                  onTap: () => context.go('/pay'),
+                ),
+                _NavItem(
+                  active: currentIndex == 2,
+                  icon: Icons.directions_car_rounded,
+                  label: AppStrings.get('vehicles', language),
+                  onTap: () => context.go('/vehicles'),
+                ),
+                _NavItem(
+                  active: currentIndex == 3,
+                  icon: Icons.history_rounded,
+                  label: AppStrings.get('history', language),
+                  onTap: () => context.go('/history'),
+                ),
+                _NavItem(
+                  active: currentIndex == 4,
+                  icon: Icons.person_rounded,
+                  label: AppStrings.get('profile', language),
+                  onTap: () => context.go('/profile'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.active,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.center = false,
+  });
+
+  final bool active;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool center;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              margin: const EdgeInsets.only(bottom: 2),
+              height: 3,
+              width: active ? 24 : 0,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(center ? 9 : 6),
+              decoration: BoxDecoration(
+                color: active
+                    ? AppColors.primary.withValues(alpha: 0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(center ? 12 : 10),
+              ),
+              child: Icon(
+                icon,
+                color: active ? AppColors.primary : AppColors.textHint,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: active ? AppColors.primary : AppColors.textHint,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ComingSoonScreen extends ConsumerWidget {
+  const _ComingSoonScreen({required this.tab});
+
+  final String tab;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final language = ref.watch(languageProvider);
+    return Scaffold(
+      appBar: AppBar(title: Text(AppStrings.get(tab, language))),
+      body: Center(
+        child: Text(
+          AppStrings.get('coming_soon', language),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
+    );
+  }
+}
