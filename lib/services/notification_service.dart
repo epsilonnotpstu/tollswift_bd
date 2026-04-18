@@ -5,9 +5,9 @@ class NotificationService {
   NotificationService({
     FirebaseMessaging? messaging,
     FlutterLocalNotificationsPlugin? localNotificationsPlugin,
-  }) : _messaging = messaging ?? FirebaseMessaging.instance,
-       _localNotificationsPlugin =
-           localNotificationsPlugin ?? FlutterLocalNotificationsPlugin();
+  })  : _messaging = messaging ?? FirebaseMessaging.instance,
+        _localNotificationsPlugin =
+            localNotificationsPlugin ?? FlutterLocalNotificationsPlugin();
 
   final FirebaseMessaging _messaging;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin;

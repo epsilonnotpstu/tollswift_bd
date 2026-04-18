@@ -257,7 +257,7 @@ class HomeScreen extends ConsumerWidget {
                               labelEn: 'Pass',
                               color: Color(0xFF8B5CF6),
                               bg: Color(0xFFF5F3FF),
-                              route: '/history',
+                              route: '/passes/store',
                             ),
                           ),
                         ],
@@ -267,6 +267,51 @@ class HomeScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 56),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: AppColors.infoBg,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.qr_code_rounded,
+                            color: AppColors.info, size: 18),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          language == 'bn'
+                              ? 'অফলাইন QR তৈরি করুন'
+                              : 'Generate Offline QR',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push('/pay/offline'),
+                        child: Text(language == 'bn' ? 'খুলুন' : 'Open'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               if (balance < 20000)
                 Padding(
                   padding:
@@ -400,7 +445,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const Spacer(),
                     TextButton(
-                      onPressed: () => context.go('/pay'),
+                      onPressed: () => context.go('/pay/nearby-gates'),
                       child: const Text('View all'),
                     ),
                   ],

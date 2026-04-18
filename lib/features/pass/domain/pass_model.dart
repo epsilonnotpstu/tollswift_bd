@@ -37,7 +37,8 @@ class PassModel {
 
   factory PassModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
-    final rawGates = (data['covered_gates'] as List?)?.cast<dynamic>() ?? const [];
+    final rawGates =
+        (data['covered_gates'] as List?)?.cast<dynamic>() ?? const [];
     return PassModel(
       id: data['id'] as String? ?? doc.id,
       userId: data['user_id'] as String? ?? '',

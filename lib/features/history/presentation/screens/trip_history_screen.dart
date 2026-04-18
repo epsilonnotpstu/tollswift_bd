@@ -28,15 +28,18 @@ class _TripHistoryScreenState extends ConsumerState<TripHistoryScreen> {
   List<TripModel> _applyFilters(List<TripModel> items) {
     return items.where((item) {
       final typeOk = _typeFilter == 'all' || item.type == _typeFilter;
-      final vehicleOk = _vehicleFilter == 'all' || item.vehicleId == _vehicleFilter;
+      final vehicleOk =
+          _vehicleFilter == 'all' || item.vehicleId == _vehicleFilter;
       return typeOk && vehicleOk;
     }).toList();
   }
 
-  Map<String, List<TripModel>> _groupByDate(List<TripModel> trips, String language) {
+  Map<String, List<TripModel>> _groupByDate(
+      List<TripModel> trips, String language) {
     final grouped = <String, List<TripModel>>{};
     for (final trip in trips) {
-      final key = DateFormatter.formatShortDate(trip.createdAt, language: language);
+      final key =
+          DateFormatter.formatShortDate(trip.createdAt, language: language);
       grouped.putIfAbsent(key, () => []).add(trip);
     }
     return grouped;
@@ -81,7 +84,8 @@ class _TripHistoryScreenState extends ConsumerState<TripHistoryScreen> {
                   children: [
                     _Stat(
                       label: language == 'bn' ? 'যাত্রা' : 'Trips',
-                      value: '${filtered.where((i) => i.type == 'toll').length}',
+                      value:
+                          '${filtered.where((i) => i.type == 'toll').length}',
                     ),
                     _Stat(
                       label: language == 'bn' ? 'মোট ব্যয়' : 'Spent',
@@ -120,7 +124,8 @@ class _TripHistoryScreenState extends ConsumerState<TripHistoryScreen> {
                     items: [
                       DropdownMenuItem(
                         value: 'all',
-                        child: Text(language == 'bn' ? 'সব গাড়ি' : 'All vehicles'),
+                        child: Text(
+                            language == 'bn' ? 'সব গাড়ি' : 'All vehicles'),
                       ),
                       ...vehicles.map(
                         (v) => DropdownMenuItem(
@@ -183,7 +188,8 @@ class _DateGroup extends StatelessWidget {
         children: [
           Text(
             dateLabel,
-            style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
+            style:
+                AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppSpacing.sm),
           ...trips.map(
@@ -193,13 +199,15 @@ class _DateGroup extends StatelessWidget {
                 key: ValueKey(trip.id),
                 direction: DismissDirection.endToStart,
                 confirmDismiss: (_) async {
-                  if (trip.type != 'toll' || trip.paymentId == null) return false;
+                  if (trip.type != 'toll' || trip.paymentId == null)
+                    return false;
                   context.push('/history/dispute?paymentId=${trip.paymentId}');
                   return false;
                 },
                 background: Container(
                   alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   decoration: BoxDecoration(
                     color: AppColors.error,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -257,7 +265,8 @@ class _TripTile extends StatelessWidget {
                   Container(
                     width: 10,
                     height: 10,
-                    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
                   ),
                   Container(
                     width: 2,
@@ -292,7 +301,8 @@ class _TripTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        DateFormatter.formatTime(trip.createdAt, language: language),
+                        DateFormatter.formatTime(trip.createdAt,
+                            language: language),
                         style: AppTextStyles.bodySmall,
                       ),
                       const SizedBox(width: 8),

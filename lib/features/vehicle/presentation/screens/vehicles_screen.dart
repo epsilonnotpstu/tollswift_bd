@@ -21,9 +21,7 @@ class VehiclesScreen extends ConsumerWidget {
     final title = language == 'bn' ? 'আমার গাড়ি' : 'My Vehicles';
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: showAppBar
-          ? AppBar(title: Text(title))
-          : null,
+      appBar: showAppBar ? AppBar(title: Text(title)) : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/vehicles/add'),
         backgroundColor: AppColors.accent,
@@ -63,7 +61,9 @@ class VehiclesScreen extends ConsumerWidget {
                       OutlinedButton.icon(
                         onPressed: () => context.push('/vehicles/add'),
                         icon: const Icon(Icons.add_rounded, size: 18),
-                        label: Text(language == 'bn' ? 'গাড়ি যোগ করুন' : 'Add Vehicle'),
+                        label: Text(language == 'bn'
+                            ? 'গাড়ি যোগ করুন'
+                            : 'Add Vehicle'),
                       ),
                     ],
                   ),
@@ -241,9 +241,7 @@ class _VehicleCard extends ConsumerWidget {
                         PopupMenuItem(
                           value: 'active',
                           child: Text(
-                            language == 'bn'
-                                ? 'সক্রিয় করুন'
-                                : 'Set Active',
+                            language == 'bn' ? 'সক্রিয় করুন' : 'Set Active',
                           ),
                         ),
                         PopupMenuItem(
@@ -298,7 +296,8 @@ class _LicensePlate extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF5C518),
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.7), width: 1.4),
+        border:
+            Border.all(color: Colors.black.withValues(alpha: 0.7), width: 1.4),
       ),
       child: Text(
         plate,

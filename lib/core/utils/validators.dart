@@ -1,7 +1,9 @@
 class Validators {
   static bool isValidBdPhone(String input) {
     final normalized = input.replaceAll(RegExp(r'\D'), '');
-    return RegExp(r'^01[3-9]\d{8}$').hasMatch(normalized);
+
+    // Support both local input (1XXXXXXXXX) and full local format (01XXXXXXXXX).
+    return RegExp(r'^(?:01[3-9]\d{8}|1[3-9]\d{8})$').hasMatch(normalized);
   }
 
   static String? phoneValidationMessage(

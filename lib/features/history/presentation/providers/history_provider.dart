@@ -12,7 +12,8 @@ final tripsProvider = StreamProvider<List<TripModel>>((ref) {
   return ref.watch(historyRepositoryProvider).tripsStream();
 });
 
-final receiptPaymentProvider = StreamProvider.family<TollPaymentModel?, String>((
+final receiptPaymentProvider =
+    StreamProvider.family<TollPaymentModel?, String>((
   ref,
   paymentId,
 ) {

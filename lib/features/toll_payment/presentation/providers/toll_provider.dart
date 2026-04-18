@@ -26,7 +26,8 @@ final verifiedGateProvider = StateProvider<TollGateModel?>((ref) => null);
 
 final lastTollPaymentIdProvider = StateProvider<String?>((ref) => null);
 
-final offlineQrTokensProvider = FutureProvider<List<OfflineQRToken>>((ref) async {
+final offlineQrTokensProvider =
+    FutureProvider<List<OfflineQRToken>>((ref) async {
   return ref.watch(qrServiceProvider).getLocalTokens();
 });
 
@@ -36,8 +37,18 @@ class TollActionsController {
   final Ref ref;
 
   Future<TollGateModel> verifyGate(String qrPayload) async {
-    final result = await ref.read(tollRepositoryProvider).verifyTollGate(qrPayload);
+    final result =
+        await ref.read(tollRepositoryProvider).verifyTollGate(qrPayload);
     if (!result.valid) throw Exception('QR invalid or expired');
+    ref.read(scannedQrPayloadProvider.notifier).state = result.qrPayload;
+    ref.read(verifiedGateProvider.notifier).state = result.gate;
+    return result.gate;
+  }
+
+  Future<TollGateModel> verifyManualCode(String manualCode) async {
+    final result =
+        await ref.read(tollRepositoryProvider).verifyManualGateCode(manualCode);
+    if (!result.valid) throw Exception('Manual gate code is invalid');
     ref.read(scannedQrPayloadProvider.notifier).state = result.qrPayload;
     ref.read(verifiedGateProvider.notifier).state = result.gate;
     return result.gate;

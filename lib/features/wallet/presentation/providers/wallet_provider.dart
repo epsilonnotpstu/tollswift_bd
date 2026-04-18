@@ -16,12 +16,10 @@ final walletBalanceProvider = StreamProvider<int>((ref) {
 
 final transactionsProvider =
     StreamProvider.family<List<TransactionModel>, String?>((ref, filter) {
-      final uid = ref.watch(authStateProvider).valueOrNull?.uid;
-      if (uid == null) return Stream.value(const []);
-      return ref
-          .watch(walletRepositoryProvider)
-          .transactionsStream(filter: filter);
-    });
+  final uid = ref.watch(authStateProvider).valueOrNull?.uid;
+  if (uid == null) return Stream.value(const []);
+  return ref.watch(walletRepositoryProvider).transactionsStream(filter: filter);
+});
 
 final recentTransactionsProvider = StreamProvider<List<TransactionModel>>((
   ref,
@@ -33,8 +31,8 @@ final recentTransactionsProvider = StreamProvider<List<TransactionModel>>((
 
 final transactionByIdProvider =
     StreamProvider.family<TransactionModel?, String>((ref, txId) {
-      return ref.watch(walletRepositoryProvider).transactionById(txId);
-    });
+  return ref.watch(walletRepositoryProvider).transactionById(txId);
+});
 
 final weeklySpendingProvider = Provider<List<double>>((ref) {
   final txList =
@@ -59,12 +57,11 @@ class WalletActionController {
     required int amountPaisa,
     required String paymentMethod,
   }) async {
-    final session = await ref
-        .read(walletRepositoryProvider)
-        .createDepositSession(
-          amountPaisa: amountPaisa,
-          paymentMethod: paymentMethod,
-        );
+    final session =
+        await ref.read(walletRepositoryProvider).createDepositSession(
+              amountPaisa: amountPaisa,
+              paymentMethod: paymentMethod,
+            );
     return (session.paymentUrl, session.transactionId);
   }
 

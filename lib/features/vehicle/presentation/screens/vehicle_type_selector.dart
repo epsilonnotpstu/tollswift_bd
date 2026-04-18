@@ -96,7 +96,9 @@ class VehicleTypeSelector extends StatelessWidget {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: selected ? item.color.withValues(alpha: 0.12) : Colors.white,
+                color: selected
+                    ? item.color.withValues(alpha: 0.12)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(
                   color: selected ? item.color : AppColors.cardBorder,

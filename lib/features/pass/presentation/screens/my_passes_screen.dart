@@ -73,7 +73,9 @@ class MyPassesScreen extends ConsumerWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: active ? AppColors.successBg : AppColors.warningBg,
+                            color: active
+                                ? AppColors.successBg
+                                : AppColors.warningBg,
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
@@ -81,7 +83,9 @@ class MyPassesScreen extends ConsumerWidget {
                                 ? (language == 'bn' ? 'সক্রিয়' : 'ACTIVE')
                                 : (language == 'bn' ? 'মেয়াদ শেষ' : 'EXPIRED'),
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: active ? AppColors.success : AppColors.warning,
+                              color: active
+                                  ? AppColors.success
+                                  : AppColors.warning,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -102,7 +106,9 @@ class MyPassesScreen extends ConsumerWidget {
                               ? '${pass.daysLeft} দিন বাকি'
                               : '${pass.daysLeft} days left',
                           style: AppTextStyles.bodySmall.copyWith(
-                            color: pass.daysLeft < 10 ? AppColors.warning : AppColors.textSecondary,
+                            color: pass.daysLeft < 10
+                                ? AppColors.warning
+                                : AppColors.textSecondary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

@@ -99,9 +99,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
   Future<void> _resendOtp() async {
     if (_seconds != 0) return;
     _startTimer();
-    await ref
-        .read(authRepositoryProvider)
-        .verifyPhoneNumber(
+    await ref.read(authRepositoryProvider).verifyPhoneNumber(
           phoneNumber: widget.phone,
           verificationCompleted: (credential) async {
             await FirebaseAuth.instance.signInWithCredential(credential);

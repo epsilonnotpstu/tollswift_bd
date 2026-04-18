@@ -10,8 +10,24 @@ import '../../features/auth/presentation/screens/profile_setup_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/home/presentation/screens/notification_screen.dart';
+import '../../features/history/presentation/screens/dispute_screen.dart';
+import '../../features/history/presentation/screens/receipt_detail_screen.dart';
+import '../../features/history/presentation/screens/trip_history_screen.dart';
+import '../../features/pass/presentation/screens/my_passes_screen.dart';
+import '../../features/pass/presentation/screens/pass_store_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
+import '../../features/toll_payment/presentation/screens/nearby_gates_screen.dart';
+import '../../features/toll_payment/presentation/screens/offline_qr_screen.dart';
+import '../../features/toll_payment/presentation/screens/payment_confirm_screen.dart';
+import '../../features/toll_payment/presentation/screens/payment_failed_screen.dart'
+    as toll_payment;
+import '../../features/toll_payment/presentation/screens/payment_success_screen.dart'
+    as toll_payment;
+import '../../features/toll_payment/presentation/screens/scan_qr_screen.dart';
+import '../../features/vehicle/presentation/screens/add_vehicle_screen.dart';
+import '../../features/vehicle/presentation/screens/vehicle_detail_screen.dart';
+import '../../features/vehicle/presentation/screens/vehicles_screen.dart';
 import '../../features/wallet/presentation/screens/add_money_screen.dart';
 import '../../features/wallet/presentation/screens/payment_failed_screen.dart';
 import '../../features/wallet/presentation/screens/payment_success_screen.dart';
@@ -92,23 +108,66 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const NotificationScreen(),
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+      GoRoute(
+          path: '/vehicles/add', builder: (_, __) => const AddVehicleScreen()),
+      GoRoute(
+        path: '/vehicles/detail/:id',
+        builder: (_, state) => VehicleDetailScreen(
+          vehicleId: state.pathParameters['id'] ?? '',
+        ),
+      ),
+      GoRoute(path: '/pay', builder: (_, __) => const ScanQrScreen()),
+      GoRoute(
+        path: '/pay/nearby-gates',
+        builder: (_, __) => const NearbyGatesScreen(),
+      ),
+      GoRoute(
+        path: '/pay/offline',
+        builder: (_, __) => const OfflineQrScreen(),
+      ),
+      GoRoute(
+        path: '/pay/confirm',
+        builder: (_, __) => const PaymentConfirmScreen(),
+      ),
+      GoRoute(
+        path: '/pay/success',
+        builder: (_, state) => toll_payment.TollPaymentSuccessScreen(
+          paymentId: state.uri.queryParameters['paymentId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/pay/failed',
+        builder: (_, state) => toll_payment.TollPaymentFailedScreen(
+          paymentId: state.uri.queryParameters['paymentId'] ?? '',
+        ),
+      ),
+      GoRoute(
+          path: '/passes/store', builder: (_, __) => const PassStoreScreen()),
+      GoRoute(path: '/passes/my', builder: (_, __) => const MyPassesScreen()),
+      GoRoute(
+        path: '/history/receipt',
+        builder: (_, state) => ReceiptDetailScreen(
+          paymentId: state.uri.queryParameters['paymentId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/history/dispute',
+        builder: (_, state) => DisputeScreen(
+          paymentId: state.uri.queryParameters['paymentId'] ?? '',
+        ),
+      ),
       ShellRoute(
         builder: (context, state, child) =>
             MainNavScaffold(location: state.uri.path, child: child),
         routes: [
           GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
           GoRoute(
-            path: '/pay',
-            builder: (_, __) => const _ComingSoonScreen(tab: 'pay_toll'),
-          ),
-          GoRoute(
             path: '/vehicles',
-            builder: (_, __) => const _ComingSoonScreen(tab: 'vehicles'),
+            builder: (_, __) => const VehiclesScreen(),
           ),
           GoRoute(
             path: '/history',
-            builder: (_, __) =>
-                const TransactionHistoryScreen(showAppBar: false),
+            builder: (_, __) => const TripHistoryScreen(),
           ),
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
         ],
@@ -181,7 +240,7 @@ class MainNavScaffold extends ConsumerWidget {
                 _NavItem(
                   active: currentIndex == 3,
                   icon: Icons.history_rounded,
-                  label: AppStrings.get('history', language),
+                  label: language == 'bn' ? 'ইতিহাস' : 'History',
                   onTap: () => context.go('/history'),
                 ),
                 _NavItem(
@@ -234,16 +293,31 @@ class _NavItem extends StatelessWidget {
               ),
             ),
             Container(
-              padding: EdgeInsets.all(center ? 9 : 6),
+              padding: EdgeInsets.all(center ? 11 : 6),
               decoration: BoxDecoration(
-                color: active
-                    ? AppColors.primary.withValues(alpha: 0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(center ? 12 : 10),
+                color: center
+                    ? AppColors.accent
+                    : active
+                        ? AppColors.primary.withValues(alpha: 0.12)
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(center ? 16 : 10),
+                boxShadow: center
+                    ? const [
+                        BoxShadow(
+                          color: Color(0x40F42A41),
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ]
+                    : null,
               ),
               child: Icon(
                 icon,
-                color: active ? AppColors.primary : AppColors.textHint,
+                color: center
+                    ? Colors.white
+                    : active
+                        ? AppColors.primary
+                        : AppColors.textHint,
               ),
             ),
             const SizedBox(height: 2),

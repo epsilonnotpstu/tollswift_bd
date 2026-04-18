@@ -9,9 +9,9 @@ class WalletRepository {
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     SSLCommerzService? sslCommerzService,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance,
-       _sslCommerzService = sslCommerzService ?? SSLCommerzService();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance,
+        _sslCommerzService = sslCommerzService ?? SSLCommerzService();
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -47,8 +47,9 @@ class WalletRepository {
     }
 
     return query.snapshots().map(
-      (snapshot) => snapshot.docs.map(TransactionModel.fromFirestore).toList(),
-    );
+          (snapshot) =>
+              snapshot.docs.map(TransactionModel.fromFirestore).toList(),
+        );
   }
 
   Stream<TransactionModel?> transactionById(String txId) {

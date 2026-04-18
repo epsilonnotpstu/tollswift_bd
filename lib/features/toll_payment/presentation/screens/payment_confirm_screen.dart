@@ -19,7 +19,8 @@ class PaymentConfirmScreen extends ConsumerStatefulWidget {
   const PaymentConfirmScreen({super.key});
 
   @override
-  ConsumerState<PaymentConfirmScreen> createState() => _PaymentConfirmScreenState();
+  ConsumerState<PaymentConfirmScreen> createState() =>
+      _PaymentConfirmScreenState();
 }
 
 class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
@@ -83,14 +84,17 @@ class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
     final gate = ref.watch(verifiedGateProvider);
     final vehicles = ref.watch(vehiclesProvider).valueOrNull ?? const [];
     final selectedVehicleId = ref.watch(selectedVehicleIdProvider);
-    final vehicle = vehicles.where((v) => v.id == selectedVehicleId).toList().firstOrNull ??
-        ref.watch(activeVehicleProvider);
+    final vehicle =
+        vehicles.where((v) => v.id == selectedVehicleId).toList().firstOrNull ??
+            ref.watch(activeVehicleProvider);
     final passes = ref.watch(activePassesProvider);
     final balance = ref.watch(walletBalanceProvider).valueOrNull ?? 0;
 
     if (gate == null || vehicle == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(language == 'bn' ? 'পেমেন্ট নিশ্চিত করুন' : 'Confirm Payment')),
+        appBar: AppBar(
+            title: Text(
+                language == 'bn' ? 'পেমেন্ট নিশ্চিত করুন' : 'Confirm Payment')),
         body: Center(
           child: FilledButton(
             onPressed: () => context.go('/pay'),
@@ -100,17 +104,22 @@ class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
       );
     }
 
-    final activePass = passes.where((p) => p.vehicleId == vehicle.id).toList().firstOrNull;
-    final tollAmount = activePass != null ? 0 : _resolveTollAmount(gate, vehicle);
+    final activePass =
+        passes.where((p) => p.vehicleId == vehicle.id).toList().firstOrNull;
+    final tollAmount =
+        activePass != null ? 0 : _resolveTollAmount(gate, vehicle);
     final shortfall = tollAmount - balance;
     final insufficient = shortfall > 0;
     final balanceAfter = balance - tollAmount;
-    final needBiometric = ref.watch(currentUserProfileProvider).valueOrNull?.biometricEnabled ?? false;
+    final needBiometric =
+        ref.watch(currentUserProfileProvider).valueOrNull?.biometricEnabled ??
+            false;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(language == 'bn' ? 'পেমেন্ট নিশ্চিত করুন' : 'Confirm Payment'),
+        title:
+            Text(language == 'bn' ? 'পেমেন্ট নিশ্চিত করুন' : 'Confirm Payment'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -230,7 +239,9 @@ class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
             children: [
               Expanded(
                 child: Text(
-                  language == 'bn' ? 'পেমেন্টের পরে ব্যালেন্স:' : 'Balance after payment:',
+                  language == 'bn'
+                      ? 'পেমেন্টের পরে ব্যালেন্স:'
+                      : 'Balance after payment:',
                   style: AppTextStyles.bodySmall,
                 ),
               ),
@@ -255,12 +266,14 @@ class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
                     language == 'bn'
                         ? '❌ অপর্যাপ্ত ব্যালেন্স — ${CurrencyFormatter.formatPaisa(shortfall)} কম আছে'
                         : '❌ Insufficient balance — short by ${CurrencyFormatter.formatPaisa(shortfall)}',
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.error),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   TextButton(
                     onPressed: () => context.push('/wallet/add'),
-                    child: Text(language == 'bn' ? 'টাকা যোগ করুন' : 'Add money'),
+                    child:
+                        Text(language == 'bn' ? 'টাকা যোগ করুন' : 'Add money'),
                   ),
                 ],
               ),

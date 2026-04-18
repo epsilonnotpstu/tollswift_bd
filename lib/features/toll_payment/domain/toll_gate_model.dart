@@ -22,7 +22,8 @@ class TollGateModel {
   final String status;
   final Map<String, int> tollRates;
 
-  factory TollGateModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory TollGateModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return TollGateModel.fromMap(data, fallbackId: doc.id);
   }
@@ -32,13 +33,15 @@ class TollGateModel {
     String fallbackId = '',
   }) {
     final geopoint = data['location'] as GeoPoint?;
-    final ratesRaw = (data['toll_rates'] as Map?)?.cast<String, dynamic>() ?? {};
+    final ratesRaw =
+        (data['toll_rates'] as Map?)?.cast<String, dynamic>() ?? {};
     return TollGateModel(
       id: data['id'] as String? ?? fallbackId,
       name: data['name'] as String? ?? '',
       nameEn: data['name_en'] as String? ?? '',
       roadName: data['road_name'] as String? ?? '',
-      location: LatLng(geopoint?.latitude ?? 23.8103, geopoint?.longitude ?? 90.4125),
+      location:
+          LatLng(geopoint?.latitude ?? 23.8103, geopoint?.longitude ?? 90.4125),
       address: data['address'] as String? ?? '',
       status: data['status'] as String? ?? 'active',
       tollRates: ratesRaw.map(

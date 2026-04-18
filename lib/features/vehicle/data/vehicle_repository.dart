@@ -15,10 +15,10 @@ class VehicleRepository {
     Dio? dio,
     this.cloudFunctionsBaseUrl =
         'https://us-central1-tollbd-production.cloudfunctions.net',
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance,
-       _storage = storage ?? FirebaseStorage.instance,
-       _dio = dio ?? Dio();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance,
+        _storage = storage ?? FirebaseStorage.instance,
+        _dio = dio ?? Dio();
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -36,7 +36,8 @@ class VehicleRepository {
         .where('owner_uid', isEqualTo: uid)
         .orderBy('created_at', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(VehicleModel.fromFirestore).toList());
+        .map((snapshot) =>
+            snapshot.docs.map(VehicleModel.fromFirestore).toList());
   }
 
   Future<String> addVehicle({

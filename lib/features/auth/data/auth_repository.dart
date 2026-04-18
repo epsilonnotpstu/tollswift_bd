@@ -7,8 +7,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../domain/auth_models.dart';
 
-typedef CodeSentCallback =
-    void Function(String verificationId, int? resendToken);
+typedef CodeSentCallback = void Function(
+    String verificationId, int? resendToken);
 
 class AuthRepository {
   AuthRepository({
@@ -16,10 +16,10 @@ class AuthRepository {
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
     FirebaseMessaging? messaging,
-  }) : _auth = auth ?? FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance,
-       _storage = storage ?? FirebaseStorage.instance,
-       _messaging = messaging ?? FirebaseMessaging.instance;
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        _storage = storage ?? FirebaseStorage.instance,
+        _messaging = messaging ?? FirebaseMessaging.instance;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;

@@ -26,6 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>TollBD uses camera to scan toll QR codes and capture vehicle/dispute documents.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TollBD uses location to show nearby toll gates on the map.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TollBD needs photo access to upload vehicle registration and dispute evidence files.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>TollBD may save generated receipts to your photo library when you choose to share.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

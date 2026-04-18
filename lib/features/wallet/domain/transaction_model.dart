@@ -51,15 +51,14 @@ class TransactionModel {
       amount: (data['amount'] as num?)?.toInt() ?? 0,
       balanceBefore: (data['balance_before'] as num?)?.toInt(),
       balanceAfter: (data['balance_after'] as num?)?.toInt(),
-      description:
-          data['description'] as String? ??
+      description: data['description'] as String? ??
           _defaultDescription(data['type'] as String?),
       descriptionBn: data['description_bn'] as String?,
       paymentMethod: data['payment_method'] as String?,
       sslcommerzTranId: data['sslcommerz_tran_id'] as String?,
       sslcommerzValId: data['sslcommerz_val_id'] as String?,
-      gatewayResponse: (data['gateway_response'] as Map?)
-          ?.cast<String, dynamic>(),
+      gatewayResponse:
+          (data['gateway_response'] as Map?)?.cast<String, dynamic>(),
       referenceId: data['reference_id'] as String?,
       createdAt: (data['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updated_at'] as Timestamp?)?.toDate(),

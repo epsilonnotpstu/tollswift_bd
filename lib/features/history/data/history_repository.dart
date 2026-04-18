@@ -14,9 +14,9 @@ class HistoryRepository {
     Dio? dio,
     this.cloudFunctionsBaseUrl =
         'https://us-central1-tollbd-production.cloudfunctions.net',
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance,
-       _dio = dio ?? Dio();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance,
+        _dio = dio ?? Dio();
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;

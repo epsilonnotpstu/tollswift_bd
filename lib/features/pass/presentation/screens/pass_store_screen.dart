@@ -31,9 +31,27 @@ class _PassStoreScreenState extends ConsumerState<PassStoreScreen> {
   ];
 
   static const _pricing = {
-    'monthly': {'motorcycle': 30000, 'car': 50000, 'microbus': 70000, 'truck': 100000, 'bus': 120000},
-    'quarterly': {'motorcycle': 80000, 'car': 130000, 'microbus': 180000, 'truck': 260000, 'bus': 300000},
-    'annual': {'motorcycle': 260000, 'car': 450000, 'microbus': 650000, 'truck': 920000, 'bus': 1050000},
+    'monthly': {
+      'motorcycle': 30000,
+      'car': 50000,
+      'microbus': 70000,
+      'truck': 100000,
+      'bus': 120000
+    },
+    'quarterly': {
+      'motorcycle': 80000,
+      'car': 130000,
+      'microbus': 180000,
+      'truck': 260000,
+      'bus': 300000
+    },
+    'annual': {
+      'motorcycle': 260000,
+      'car': 450000,
+      'microbus': 650000,
+      'truck': 920000,
+      'bus': 1050000
+    },
   };
 
   int _priceOf(String passType) {
@@ -45,7 +63,10 @@ class _PassStoreScreenState extends ConsumerState<PassStoreScreen> {
     final vehicle = ref.read(activeVehicleProvider);
     if (vehicle == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(language == 'bn' ? 'প্রথমে গাড়ি যোগ করুন' : 'Add a vehicle first')),
+        SnackBar(
+            content: Text(language == 'bn'
+                ? 'প্রথমে গাড়ি যোগ করুন'
+                : 'Add a vehicle first')),
       );
       return;
     }
@@ -79,7 +100,9 @@ class _PassStoreScreenState extends ConsumerState<PassStoreScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                language == 'bn' ? 'পাস ক্রয় নিশ্চিত করুন' : 'Confirm pass purchase',
+                language == 'bn'
+                    ? 'পাস ক্রয় নিশ্চিত করুন'
+                    : 'Confirm pass purchase',
                 style: AppTextStyles.h4,
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -178,8 +201,12 @@ class _PassStoreScreenState extends ConsumerState<PassStoreScreen> {
             price: _priceOf('monthly'),
             savings: language == 'bn' ? '৳300 সাশ্রয়' : 'Save ৳300',
             features: [
-              language == 'bn' ? 'সকল জাতীয় মহাসড়ক টোল গেট' : 'All national highways',
-              language == 'bn' ? 'FastPass লেন অ্যাক্সেস' : 'FastPass lane access',
+              language == 'bn'
+                  ? 'সকল জাতীয় মহাসড়ক টোল গেট'
+                  : 'All national highways',
+              language == 'bn'
+                  ? 'FastPass লেন অ্যাক্সেস'
+                  : 'FastPass lane access',
               language == 'bn' ? 'স্বয়ংক্রিয় পেমেন্ট' : 'Automatic payment',
               language == 'bn' ? 'ডিজিটাল পাস কার্ড' : 'Digital pass card',
             ],
@@ -199,7 +226,9 @@ class _PassStoreScreenState extends ConsumerState<PassStoreScreen> {
             featured: true,
             features: [
               language == 'bn' ? 'অতিরিক্ত ১০% ছাড়' : 'Extra 10% discount',
-              language == 'bn' ? 'FastPass লেন অ্যাক্সেস' : 'FastPass lane access',
+              language == 'bn'
+                  ? 'FastPass লেন অ্যাক্সেস'
+                  : 'FastPass lane access',
               language == 'bn' ? 'স্বয়ংক্রিয় পেমেন্ট' : 'Automatic payment',
             ],
             actionLabel: language == 'bn' ? 'এখনই কিনুন' : 'Buy Now',
@@ -217,7 +246,9 @@ class _PassStoreScreenState extends ConsumerState<PassStoreScreen> {
             savings: language == 'bn' ? 'সর্বোচ্চ সাশ্রয়' : 'Best value',
             features: [
               language == 'bn' ? 'অগ্রাধিকার গ্রাহক সেবা' : 'Priority support',
-              language == 'bn' ? 'FastPass লেন অ্যাক্সেস' : 'FastPass lane access',
+              language == 'bn'
+                  ? 'FastPass লেন অ্যাক্সেস'
+                  : 'FastPass lane access',
               language == 'bn' ? 'সব গেট কভারেজ' : 'All gates coverage',
             ],
             actionLabel: language == 'bn' ? 'এখনই কিনুন' : 'Buy Now',
@@ -281,7 +312,8 @@ class _PassCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: gradient),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppRadius.lg)),
             ),
             child: Row(
               children: [
@@ -293,7 +325,8 @@ class _PassCard extends StatelessWidget {
                 ),
                 Text(
                   duration,
-                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white70),
+                  style:
+                      AppTextStyles.bodySmall.copyWith(color: Colors.white70),
                 ),
               ],
             ),

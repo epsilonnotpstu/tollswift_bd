@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "125386761920",
+    "project_id": "tollbd",
+    "storage_bucket": "tollbd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125386761920:android:d8e11b34699a814484af25",
+        "android_client_info": {
+          "package_name": "com.example.tollbd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQz-zp0StIDo1hMPj1780pHfbJuj2G8NU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

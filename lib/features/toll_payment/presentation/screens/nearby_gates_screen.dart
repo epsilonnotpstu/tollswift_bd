@@ -60,8 +60,8 @@ class _NearbyGatesScreenState extends ConsumerState<NearbyGatesScreen> {
     final language = ref.watch(languageProvider);
     final gates = ref.watch(tollGatesProvider).valueOrNull ?? const [];
     final current = _myLocation ?? const LatLng(23.8103, 90.4125);
-    final sorted = [...gates]
-      ..sort((a, b) => _distanceKm(current, a.location).compareTo(_distanceKm(current, b.location)));
+    final sorted = [...gates]..sort((a, b) => _distanceKm(current, a.location)
+        .compareTo(_distanceKm(current, b.location)));
     final nearest = sorted.isNotEmpty ? sorted.first : null;
 
     final markers = <Marker>{
@@ -75,7 +75,9 @@ class _NearbyGatesScreenState extends ConsumerState<NearbyGatesScreen> {
           markerId: MarkerId(gate.id),
           position: gate.location,
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            gate.status == 'active' ? BitmapDescriptor.hueGreen : BitmapDescriptor.hueOrange,
+            gate.status == 'active'
+                ? BitmapDescriptor.hueGreen
+                : BitmapDescriptor.hueOrange,
           ),
           onTap: () => _showGateDetail(gate),
         ),
@@ -131,7 +133,8 @@ class _NearbyGatesScreenState extends ConsumerState<NearbyGatesScreen> {
                             color: color.withValues(alpha: 0.14),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.toll_rounded, color: color, size: 18),
+                          child:
+                              Icon(Icons.toll_rounded, color: color, size: 18),
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
@@ -170,7 +173,8 @@ class _NearbyGatesScreenState extends ConsumerState<NearbyGatesScreen> {
                   ),
                 );
               },
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(height: AppSpacing.sm),
               itemCount: sorted.length,
             ),
           ),
@@ -204,7 +208,9 @@ class _NearbyGatesScreenState extends ConsumerState<NearbyGatesScreen> {
                     padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
-                        Expanded(child: Text(entry.key, style: AppTextStyles.bodySmall)),
+                        Expanded(
+                            child: Text(entry.key,
+                                style: AppTextStyles.bodySmall)),
                         Text(
                           '৳${(entry.value / 100).toStringAsFixed(0)}',
                           style: AppTextStyles.amountSmall,

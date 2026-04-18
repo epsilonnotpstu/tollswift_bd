@@ -40,9 +40,9 @@ class TollRepository {
     Dio? dio,
     this.cloudFunctionsBaseUrl =
         'https://us-central1-tollbd-production.cloudfunctions.net',
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance,
-       _dio = dio ?? Dio();
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance,
+        _dio = dio ?? Dio();
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -56,7 +56,8 @@ class TollRepository {
         .collection('toll_gates')
         .orderBy('name_en')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(TollGateModel.fromFirestore).toList());
+        .map((snapshot) =>
+            snapshot.docs.map(TollGateModel.fromFirestore).toList());
   }
 
   Stream<List<TollPaymentModel>> tollPaymentsStream({int limit = 50}) {
@@ -68,7 +69,8 @@ class TollRepository {
         .orderBy('created_at', descending: true)
         .limit(limit)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(TollPaymentModel.fromFirestore).toList());
+        .map((snapshot) =>
+            snapshot.docs.map(TollPaymentModel.fromFirestore).toList());
   }
 
   Future<VerifyGateResponse> verifyTollGate(String qrPayload) async {
@@ -91,7 +93,35 @@ class TollRepository {
     return VerifyGateResponse(
       valid: result['valid'] == true,
       qrPayload: result['qrPayload'] as String? ?? qrPayload,
-      gate: TollGateModel.fromMap(gateMap, fallbackId: gateMap['id']?.toString() ?? ''),
+      gate: TollGateModel.fromMap(gateMap,
+          fallbackId: gateMap['id']?.toString() ?? ''),
+    );
+  }
+
+  Future<VerifyGateResponse> verifyManualGateCode(String manualCode) async {
+    final token = await _auth.currentUser?.getIdToken();
+    if (token == null) throw Exception('User not authenticated');
+
+    final response = await _dio.post<Map<String, dynamic>>(
+      '$cloudFunctionsBaseUrl/verifyTollGate',
+      data: {
+        'data': {'manualCode': manualCode},
+      },
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    final body = response.data ?? {};
+    final result = (body['result'] as Map?)?.cast<String, dynamic>() ?? body;
+    final gateMap = (result['gate'] as Map?)?.cast<String, dynamic>();
+    if (gateMap == null) throw Exception('Invalid gate response');
+
+    return VerifyGateResponse(
+      valid: result['valid'] == true,
+      qrPayload: result['qrPayload'] as String? ?? manualCode,
+      gate: TollGateModel.fromMap(
+        gateMap,
+        fallbackId: gateMap['id']?.toString() ?? '',
+      ),
     );
   }
 

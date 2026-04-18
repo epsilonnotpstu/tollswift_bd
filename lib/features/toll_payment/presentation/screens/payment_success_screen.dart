@@ -13,7 +13,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../history/presentation/providers/history_provider.dart';
-import '../../presentation/providers/toll_provider.dart';
+import '../providers/toll_provider.dart';
 
 class TollPaymentSuccessScreen extends ConsumerStatefulWidget {
   const TollPaymentSuccessScreen({super.key, required this.paymentId});
@@ -86,7 +86,9 @@ class _TollPaymentSuccessScreenState
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  language == 'bn' ? 'টোল পরিশোধ সম্পন্ন' : 'Toll payment complete',
+                  language == 'bn'
+                      ? 'টোল পরিশোধ সম্পন্ন'
+                      : 'Toll payment complete',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -151,7 +153,8 @@ class _TollPaymentSuccessScreenState
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 OutlinedButton.icon(
-                  onPressed: () => context.push('/history/receipt?paymentId=$txId'),
+                  onPressed: () =>
+                      context.push('/history/receipt?paymentId=$txId'),
                   icon: const Icon(Icons.picture_as_pdf_rounded),
                   label: Text(language == 'bn'
                       ? 'রসিদ ডাউনলোড করুন'
@@ -203,9 +206,10 @@ class _Item extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: valueStyle ?? AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: valueStyle ??
+                  AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
           ),
           if (trailing != null) trailing!,

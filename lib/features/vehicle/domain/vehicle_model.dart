@@ -37,7 +37,8 @@ class VehicleModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  factory VehicleModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory VehicleModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return VehicleModel(
       id: data['id'] as String? ?? doc.id,
@@ -81,7 +82,8 @@ class VehicleModel {
   }
 
   String get displayName {
-    final brand = [make, model].where((item) => item.trim().isNotEmpty).join(' ');
+    final brand =
+        [make, model].where((item) => item.trim().isNotEmpty).join(' ');
     if (brand.isEmpty) return year.toString();
     return '$brand $year';
   }

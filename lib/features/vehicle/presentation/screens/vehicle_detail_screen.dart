@@ -31,7 +31,9 @@ class VehicleDetailScreen extends ConsumerWidget {
                 Text(vehicle.plateNumber, style: AppTextStyles.h2),
                 const SizedBox(height: AppSpacing.md),
                 _Item(label: 'Type', value: vehicle.vehicleType),
-                _Item(label: 'Make / Model', value: '${vehicle.make} ${vehicle.model}'),
+                _Item(
+                    label: 'Make / Model',
+                    value: '${vehicle.make} ${vehicle.model}'),
                 _Item(label: 'Year', value: vehicle.year.toString()),
                 _Item(label: 'Color', value: vehicle.color),
                 _Item(label: 'Nickname', value: vehicle.nickname),
@@ -58,7 +60,8 @@ class _Item extends StatelessWidget {
           Expanded(
             child: Text(
               value.isEmpty ? '-' : value,
-              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.end,
             ),
           ),

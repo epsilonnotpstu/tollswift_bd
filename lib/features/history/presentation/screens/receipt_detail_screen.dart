@@ -89,9 +89,7 @@ class ReceiptDetailScreen extends ConsumerWidget {
           if (payment == null) {
             return Center(
               child: Text(
-                language == 'bn'
-                    ? 'রসিদ পাওয়া যায়নি'
-                    : 'Receipt not found',
+                language == 'bn' ? 'রসিদ পাওয়া যায়নি' : 'Receipt not found',
               ),
             );
           }
@@ -190,10 +188,13 @@ class ReceiptDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               FilledButton.icon(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-                onPressed: () => context.push('/history/dispute?paymentId=${payment.id}'),
+                style:
+                    FilledButton.styleFrom(backgroundColor: AppColors.accent),
+                onPressed: () =>
+                    context.push('/history/dispute?paymentId=${payment.id}'),
                 icon: const Icon(Icons.report_problem_outlined),
-                label: Text(language == 'bn' ? 'বিরোধ দাখিল করুন' : 'Raise Dispute'),
+                label: Text(
+                    language == 'bn' ? 'বিরোধ দাখিল করুন' : 'Raise Dispute'),
               ),
             ],
           );

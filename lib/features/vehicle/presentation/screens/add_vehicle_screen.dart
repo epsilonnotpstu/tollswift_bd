@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -27,7 +28,8 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   final _ownerController = TextEditingController();
   final _makeModelController = TextEditingController();
   final _nicknameController = TextEditingController();
-  final _yearController = TextEditingController(text: DateTime.now().year.toString());
+  final _yearController =
+      TextEditingController(text: DateTime.now().year.toString());
 
   String _vehicleType = 'car';
   String _color = 'White';
@@ -36,6 +38,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   bool _verifying = false;
   BRTCVerificationResult? _brtcResult;
   File? _registrationFile;
+  static const int _maxUploadBytes = 5 * 1024 * 1024;
 
   static const _colorOptions = [
     'White',
@@ -77,7 +80,8 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       _brtcResult = null;
     });
     try {
-      final result = await ref.read(vehicleActionsProvider).verifyWithBrtc(plate);
+      final result =
+          await ref.read(vehicleActionsProvider).verifyWithBrtc(plate);
       if (!mounted) return;
       setState(() {
         _verifying = false;
@@ -104,18 +108,89 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   }
 
   Future<void> _pickRegistration() async {
-    final file = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
+    final language = ref.read(languageProvider);
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded),
+                title: Text(language == 'bn' ? 'ক্যামেরা' : 'Camera'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded),
+                title: Text(language == 'bn' ? 'গ্যালারি' : 'Gallery'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_rounded),
+                title: Text(language == 'bn' ? 'PDF ফাইল' : 'PDF file'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _pickPdf();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picked = await ImagePicker().pickImage(
+      source: source,
       imageQuality: 85,
       maxWidth: 1800,
     );
-    if (file == null) return;
-    setState(() => _registrationFile = File(file.path));
+    if (picked == null) return;
+    await _setRegistrationFile(File(picked.path));
+  }
+
+  Future<void> _pickPdf() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+    if (result == null || result.files.single.path == null) return;
+    await _setRegistrationFile(File(result.files.single.path!));
+  }
+
+  Future<void> _setRegistrationFile(File file) async {
+    final language = ref.read(languageProvider);
+    final bytes = await file.length();
+    if (bytes > _maxUploadBytes) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            language == 'bn'
+                ? 'ফাইলের সাইজ ৫MB এর কম হতে হবে'
+                : 'File size must be 5MB or smaller',
+          ),
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _registrationFile = file);
   }
 
   Future<void> _submit() async {
     final language = ref.read(languageProvider);
-    if (_plateController.text.trim().isEmpty || _makeModelController.text.trim().isEmpty) {
+    if (_plateController.text.trim().isEmpty ||
+        _makeModelController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -144,16 +219,15 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     try {
       final makeModel = _makeModelController.text.trim().split(RegExp(r'\s+'));
       final make = makeModel.isNotEmpty ? makeModel.first : '';
-      final model = makeModel.length > 1
-          ? makeModel.sublist(1).join(' ')
-          : '';
+      final model = makeModel.length > 1 ? makeModel.sublist(1).join(' ') : '';
       await ref.read(vehicleActionsProvider).addVehicle(
             plateNumber: _plateController.text.trim(),
             vehicleType: _vehicleType,
             make: make,
             model: model,
             color: _color,
-            year: int.tryParse(_yearController.text.trim()) ?? DateTime.now().year,
+            year: int.tryParse(_yearController.text.trim()) ??
+                DateTime.now().year,
             nickname: _nicknameController.text.trim(),
             brtcVerified: _brtcResult?.verified ?? false,
             brtcData: _brtcResult?.raw,
@@ -163,7 +237,9 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       context.go('/vehicles');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(language == 'bn' ? 'গাড়ি যোগ করা হয়েছে!' : 'Vehicle added successfully!'),
+          content: Text(language == 'bn'
+              ? 'গাড়ি যোগ করা হয়েছে!'
+              : 'Vehicle added successfully!'),
         ),
       );
     } catch (e) {
@@ -289,7 +365,9 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
               const SizedBox(height: AppSpacing.sm),
               OutlinedButton(
                 onPressed: _verifying ? null : _verifyBrtc,
-                child: Text(language == 'bn' ? 'BRTC দিয়ে যাচাই করুন' : 'Verify with BRTC'),
+                child: Text(language == 'bn'
+                    ? 'BRTC দিয়ে যাচাই করুন'
+                    : 'Verify with BRTC'),
               ),
               _buildBrtcBanner(language),
               const SizedBox(height: AppSpacing.lg),
@@ -321,9 +399,8 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
               TextField(
                 controller: _makeModelController,
                 decoration: InputDecoration(
-                  labelText: language == 'bn'
-                      ? 'নির্মাতা ও মডেল'
-                      : 'Make and Model',
+                  labelText:
+                      language == 'bn' ? 'নির্মাতা ও মডেল' : 'Make and Model',
                   hintText: 'Toyota Corolla',
                 ),
               ),
@@ -333,14 +410,17 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
-                  labelText: language == 'bn' ? 'নির্মাণ বছর' : 'Manufacture Year',
+                  labelText:
+                      language == 'bn' ? 'নির্মাণ বছর' : 'Manufacture Year',
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 controller: _nicknameController,
                 decoration: InputDecoration(
-                  labelText: language == 'bn' ? 'ডাকনাম (ঐচ্ছিক)' : 'Nickname (optional)',
+                  labelText: language == 'bn'
+                      ? 'ডাকনাম (ঐচ্ছিক)'
+                      : 'Nickname (optional)',
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -384,12 +464,20 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                       Text(
                         _registrationFile == null
                             ? (language == 'bn'
-                                ? 'ছবি তুলুন বা গ্যালারি থেকে বেছে নিন'
-                                : 'Pick image from gallery')
+                                ? 'ছবি তুলুন, গ্যালারি বা PDF বেছে নিন'
+                                : 'Use camera, gallery, or PDF file')
                             : _registrationFile!.path.split('/').last,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall,
                       ),
+                      if (_registrationFile == null)
+                        Text(
+                          language == 'bn'
+                              ? 'JPG, PNG, PDF (সর্বোচ্চ ৫MB)'
+                              : 'JPG, PNG, PDF (max 5MB)',
+                          style: AppTextStyles.bodySmall
+                              .copyWith(color: AppColors.textHint),
+                        ),
                     ],
                   ),
                 ),
@@ -404,7 +492,8 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
               const SizedBox(height: AppSpacing.xl),
               FilledButton(
                 onPressed: _submit,
-                child: Text(language == 'bn' ? 'গাড়ি যোগ করুন' : 'Add Vehicle'),
+                child:
+                    Text(language == 'bn' ? 'গাড়ি যোগ করুন' : 'Add Vehicle'),
               ),
               const SizedBox(height: AppSpacing.sm),
               TextButton(

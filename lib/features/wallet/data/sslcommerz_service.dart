@@ -17,8 +17,8 @@ class SSLCommerzService {
     FirebaseAuth? auth,
     this.cloudFunctionsBaseUrl =
         'https://us-central1-tollbd-production.cloudfunctions.net',
-  }) : _dio = dio ?? Dio(),
-       _auth = auth ?? FirebaseAuth.instance;
+  })  : _dio = dio ?? Dio(),
+        _auth = auth ?? FirebaseAuth.instance;
 
   final Dio _dio;
   final FirebaseAuth _auth;

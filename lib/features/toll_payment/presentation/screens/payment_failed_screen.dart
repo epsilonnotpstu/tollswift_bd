@@ -32,7 +32,8 @@ class TollPaymentFailedScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.errorBg,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
+                  border:
+                      Border.all(color: AppColors.error.withValues(alpha: 0.2)),
                 ),
                 child: const Icon(
                   Icons.cancel_rounded,
@@ -77,7 +78,8 @@ class TollPaymentFailedScreen extends ConsumerWidget {
                       language == 'bn'
                           ? 'সম্ভাব্য কারণ: অপর্যাপ্ত ব্যালেন্স, গেটওয়ে/নেটওয়ার্ক ত্রুটি'
                           : 'Possible causes: insufficient balance, gateway/network issue',
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -85,8 +87,10 @@ class TollPaymentFailedScreen extends ConsumerWidget {
               const Spacer(),
               FilledButton(
                 onPressed: () => context.go('/pay'),
-                style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-                child: Text(language == 'bn' ? 'আবার চেষ্টা করুন' : 'Try Again'),
+                style:
+                    FilledButton.styleFrom(backgroundColor: AppColors.accent),
+                child:
+                    Text(language == 'bn' ? 'আবার চেষ্টা করুন' : 'Try Again'),
               ),
               const SizedBox(height: AppSpacing.sm),
               TextButton(

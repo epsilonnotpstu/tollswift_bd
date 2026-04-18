@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,7 +78,8 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     ? const Icon(Icons.check_circle, color: AppColors.primary)
                     : null,
                 onTap: () {
-                  ref.read(selectedVehicleIdProvider.notifier).state = vehicle.id;
+                  ref.read(selectedVehicleIdProvider.notifier).state =
+                      vehicle.id;
                   Navigator.of(context).pop();
                 },
               ),
@@ -93,12 +92,34 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
 
   Future<void> _handleManualCode() async {
     final code = _manualController.text.trim();
-    if (code.length < 6) return;
-    final payload = jsonEncode({
-      'gate_code': code,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
-    await _handlePayload(payload);
+    if (!RegExp(r'^\d{8}$').hasMatch(code)) {
+      final language = ref.read(languageProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            language == 'bn'
+                ? '৮ সংখ্যার সঠিক গেট কোড দিন'
+                : 'Enter a valid 8-digit gate code',
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (_processing) return;
+    setState(() => _processing = true);
+    try {
+      await ref.read(tollActionsProvider).verifyManualCode(code);
+      if (!mounted) return;
+      context.push('/pay/confirm');
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _processing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
+    }
   }
 
   @override
@@ -106,10 +127,11 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
     final language = ref.watch(languageProvider);
     final activeVehicle = ref.watch(activeVehicleProvider);
     final selectedId = ref.watch(selectedVehicleIdProvider);
-    final selectedVehicle = (ref.watch(vehiclesProvider).valueOrNull ?? const [])
-        .where((v) => v.id == selectedId)
-        .toList()
-        .firstOrNull;
+    final selectedVehicle =
+        (ref.watch(vehiclesProvider).valueOrNull ?? const [])
+            .where((v) => v.id == selectedId)
+            .toList()
+            .firstOrNull;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -225,7 +247,9 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                         child: TextField(
                           controller: _manualController,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
                           decoration: InputDecoration(
                             hintText: language == 'bn'
                                 ? 'ম্যানুয়াল গেট কোড (৮ ডিজিট)'
@@ -239,6 +263,16 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                         child: Text(language == 'bn' ? 'যাচাই' : 'Verify'),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  TextButton.icon(
+                    onPressed: () => context.push('/pay/offline'),
+                    icon: const Icon(Icons.qr_code_rounded),
+                    label: Text(
+                      language == 'bn'
+                          ? 'অফলাইন QR টোকেন'
+                          : 'Offline QR Tokens',
+                    ),
                   ),
                 ],
               ),

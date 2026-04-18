@@ -32,7 +32,7 @@ final currentUserProfileProvider = StreamProvider<AppUser?>((ref) {
 
 class LanguageNotifier extends StateNotifier<String> {
   LanguageNotifier(this.ref)
-    : super(ref.read(authLocalDatasourceProvider).getPreferredLanguage());
+      : super(ref.read(authLocalDatasourceProvider).getPreferredLanguage());
 
   final Ref ref;
 
@@ -54,7 +54,7 @@ final languageProvider = StateNotifierProvider<LanguageNotifier, String>(
 
 class HideBalanceNotifier extends StateNotifier<bool> {
   HideBalanceNotifier(this.ref)
-    : super(ref.read(authLocalDatasourceProvider).getHideBalance());
+      : super(ref.read(authLocalDatasourceProvider).getHideBalance());
 
   final Ref ref;
 
