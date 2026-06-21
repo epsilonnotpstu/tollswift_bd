@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { sendPushAndLog } from "../notifications/notificationHelper";
 
 type SslIppBody = {
   tran_id?: string;
@@ -77,18 +78,18 @@ export const sslcommerzIPN = functions.https.onRequest(async (req, res) => {
       });
     });
 
-    const userDoc = await userRef.get();
-    const fcmToken = userDoc.data()?.fcm_token as string | undefined;
-    if (fcmToken) {
-      await admin.messaging().send({
-        token: fcmToken,
-        notification: {
-          title: "ওয়ালেটে টাকা যোগ হয়েছে! 💰",
-          body: `৳${(tx.amount / 100).toFixed(2)} সফলভাবে যোগ হয়েছে`,
-        },
-        data: { type: "wallet_credit", transaction_id: tranId },
-      });
-    }
+    await sendPushAndLog({
+      userId: tx.user_id,
+      type: "wallet_credit",
+      title: "Wallet credited",
+      titleBn: "ওয়ালেটে টাকা যোগ হয়েছে! 💰",
+      body: `BDT ${(tx.amount / 100).toFixed(2)} has been added to your wallet.`,
+      bodyBn: `৳${(tx.amount / 100).toFixed(2)} সফলভাবে যোগ হয়েছে`,
+      data: {
+        transactionId: tranId,
+        amount: tx.amount,
+      },
+    });
 
     res.status(200).send("IPN processed");
   } catch (error) {

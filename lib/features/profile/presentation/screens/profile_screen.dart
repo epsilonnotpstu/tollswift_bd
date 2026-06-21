@@ -8,6 +8,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../providers/profile_provider.dart';
 import '../../../wallet/presentation/providers/wallet_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -17,10 +18,25 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final language = ref.watch(languageProvider);
     final profile = ref.watch(currentUserProfileProvider).valueOrNull;
+    final family = ref.watch(familyAccountProvider).valueOrNull;
+    final nidVerification = ref.watch(nidVerificationProvider).valueOrNull;
     final balance = ref.watch(walletBalanceProvider).valueOrNull ?? 0;
     final title = profile == null
         ? (language == 'bn' ? 'ব্যবহারকারী' : 'User')
         : (language == 'bn' ? profile.nameBn : profile.name);
+    final nidStatus = nidVerification?.status ??
+        (profile?.nidVerified == true ? 'verified' : 'pending');
+    final nidBadgeText = switch (nidStatus) {
+      'verified' => 'NID Verified',
+      'rejected' => 'NID Rejected',
+      _ => 'NID Pending',
+    };
+    final nidBadgeColor = switch (nidStatus) {
+      'verified' => const Color(0xFF4ADE80),
+      'rejected' => const Color(0xFFEF4444),
+      _ => const Color(0xFFF59E0B),
+    };
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -83,13 +99,13 @@ class ProfileScreen extends ConsumerWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0x3310B981),
+                                color: nidBadgeColor.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(99),
                               ),
                               child: Text(
-                                'NID Verified',
+                                nidBadgeText,
                                 style: AppTextStyles.bodySmall.copyWith(
-                                  color: const Color(0xFF4ADE80),
+                                  color: nidBadgeColor,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -105,10 +121,11 @@ class ProfileScreen extends ConsumerWidget {
             Container(
               margin: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
-                -14,
+                0,
                 AppSpacing.lg,
                 AppSpacing.lg,
               ),
+              transform: Matrix4.translationValues(0, -14, 0),
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -171,6 +188,12 @@ class ProfileScreen extends ConsumerWidget {
                   suffixText: '1 active',
                   onTap: () => context.go('/history'),
                 ),
+                _ItemTile(
+                  title: 'Family Account',
+                  icon: Icons.family_restroom_rounded,
+                  suffixText: family == null ? 'Not set' : '${family.members.length} members',
+                  onTap: () => context.push('/profile/family'),
+                ),
               ],
             ),
             _Section(
@@ -186,6 +209,22 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.fingerprint_rounded,
                   suffixText: 'Enabled',
                   onTap: () => context.push('/settings'),
+                ),
+                _ItemTile(
+                  title: 'NID Verification',
+                  icon: Icons.badge_outlined,
+                  suffixText: nidStatus,
+                  onTap: () => context.push('/profile/nid'),
+                ),
+              ],
+            ),
+            _Section(
+              title: 'Support',
+              children: [
+                _ItemTile(
+                  title: 'Help & FAQ',
+                  icon: Icons.help_outline_rounded,
+                  onTap: () => context.push('/profile/help'),
                 ),
                 _ItemTile(
                   title: AppStrings.get('settings', language),

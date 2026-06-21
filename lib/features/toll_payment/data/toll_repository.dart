@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../domain/gate_queue_model.dart';
+import '../domain/route_estimate_model.dart';
 import '../domain/toll_gate_model.dart';
 import '../domain/toll_payment_model.dart';
 
@@ -71,6 +73,14 @@ class TollRepository {
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map(TollPaymentModel.fromFirestore).toList());
+  }
+
+  Stream<GateQueueModel?> gateQueueStream(String gateId) {
+    return _firestore.collection('gate_queue').doc(gateId).snapshots().map((doc) {
+      final data = doc.data();
+      if (data == null) return null;
+      return GateQueueModel.fromFirestore(doc.id, data);
+    });
   }
 
   Future<VerifyGateResponse> verifyTollGate(String qrPayload) async {
@@ -151,5 +161,34 @@ class TollRepository {
       hasFreePass: result['hasFreePass'] == true,
       balanceAfter: (result['balanceAfter'] as num?)?.toInt() ?? 0,
     );
+  }
+
+  Future<RouteEstimateModel> estimateRouteTolls({
+    required double originLat,
+    required double originLng,
+    required double destLat,
+    required double destLng,
+    required String vehicleType,
+  }) async {
+    final token = await _auth.currentUser?.getIdToken();
+    if (token == null) throw Exception('User not authenticated');
+
+    final response = await _dio.post<Map<String, dynamic>>(
+      '$cloudFunctionsBaseUrl/estimateRouteTolls',
+      data: {
+        'data': {
+          'originLat': originLat,
+          'originLng': originLng,
+          'destLat': destLat,
+          'destLng': destLng,
+          'vehicleType': vehicleType,
+        },
+      },
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    final body = response.data ?? {};
+    final result = (body['result'] as Map?)?.cast<String, dynamic>() ?? body;
+    return RouteEstimateModel.fromMap(result);
   }
 }

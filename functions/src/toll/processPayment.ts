@@ -3,6 +3,7 @@ import { createHash } from "crypto";
 import * as functions from "firebase-functions";
 
 import { decodeAndVerifyQrPayload } from "./verifyTollGate";
+import { sendPushAndLog } from "../notifications/notificationHelper";
 
 type ProcessPayload = {
   qrPayload: string;
@@ -174,17 +175,36 @@ export const processTollPayment = functions.https.onCall(async (rawData, context
   });
 
   const userDoc = await userRef.get();
-  const fcmToken = userDoc.data()?.fcm_token as string | undefined;
-  if (fcmToken) {
-    await admin.messaging().send({
-      token: fcmToken,
-      notification: {
-        title: "টোল পরিশোধ সম্পন্ন ✓",
-        body: `৳${(tollAmount / 100).toFixed(2)} কাটা হয়েছে`,
-      },
+  const userData = userDoc.data() ?? {};
+  await sendPushAndLog({
+    userId,
+    type: "toll_payment",
+    title: "Toll payment completed",
+    titleBn: "টোল পরিশোধ সম্পন্ন ✓",
+    body: `৳${(tollAmount / 100).toFixed(2)} deducted for ${gate.name}.`,
+    bodyBn: `${gate.name} এর জন্য ৳${(tollAmount / 100).toFixed(2)} কাটা হয়েছে`,
+    data: {
+      paymentId: paymentRef.id,
+      gateId: gateRef.id,
+      amount: tollAmount,
+      balanceAfter,
+    },
+  });
+
+  const lowBalanceThreshold = Number(
+    userData.low_balance_threshold ?? userData.lowBalanceThreshold ?? 2000
+  );
+  if (balanceAfter <= lowBalanceThreshold) {
+    await sendPushAndLog({
+      userId,
+      type: "low_balance",
+      title: "Low wallet balance",
+      titleBn: "ওয়ালেট ব্যালেন্স কম",
+      body: "Please add money to avoid toll payment failures.",
+      bodyBn: "টোল পরিশোধে সমস্যা এড়াতে ওয়ালেটে টাকা যোগ করুন।",
       data: {
-        type: "toll_payment",
-        payment_id: paymentRef.id,
+        balance: balanceAfter,
+        threshold: lowBalanceThreshold,
       },
     });
   }

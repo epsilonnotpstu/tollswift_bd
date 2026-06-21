@@ -15,6 +15,10 @@ import '../../features/history/presentation/screens/receipt_detail_screen.dart';
 import '../../features/history/presentation/screens/trip_history_screen.dart';
 import '../../features/pass/presentation/screens/my_passes_screen.dart';
 import '../../features/pass/presentation/screens/pass_store_screen.dart';
+import '../../features/profile/presentation/screens/family_account_screen.dart';
+import '../../features/profile/presentation/screens/help_screen.dart';
+import '../../features/profile/presentation/screens/invite_member_screen.dart';
+import '../../features/profile/presentation/screens/nid_verification_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
 import '../../features/toll_payment/presentation/screens/nearby_gates_screen.dart';
@@ -25,6 +29,7 @@ import '../../features/toll_payment/presentation/screens/payment_failed_screen.d
 import '../../features/toll_payment/presentation/screens/payment_success_screen.dart'
     as toll_payment;
 import '../../features/toll_payment/presentation/screens/scan_qr_screen.dart';
+import '../../features/toll_payment/presentation/screens/toll_estimator_screen.dart';
 import '../../features/vehicle/presentation/screens/add_vehicle_screen.dart';
 import '../../features/vehicle/presentation/screens/vehicle_detail_screen.dart';
 import '../../features/vehicle/presentation/screens/vehicles_screen.dart';
@@ -113,6 +118,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
       GoRoute(
+        path: '/profile/family',
+        builder: (_, __) => const FamilyAccountScreen(),
+      ),
+      GoRoute(
+        path: '/profile/family/invite',
+        builder: (_, state) => InviteMemberScreen(
+          familyId: state.uri.queryParameters['familyId'] ?? '',
+        ),
+      ),
+      GoRoute(path: '/profile/nid', builder: (_, __) => const NidVerificationScreen()),
+      GoRoute(path: '/profile/help', builder: (_, __) => const HelpScreen()),
+      GoRoute(
           path: '/vehicles/add', builder: (_, __) => const AddVehicleScreen()),
       GoRoute(
         path: '/vehicles/detail/:id',
@@ -124,6 +141,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pay/nearby-gates',
         builder: (_, __) => const NearbyGatesScreen(),
+      ),
+      GoRoute(
+        path: '/pay/estimator',
+        builder: (_, __) => const TollEstimatorScreen(),
       ),
       GoRoute(
         path: '/pay/offline',
@@ -336,26 +357,6 @@ class _NavItem extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ComingSoonScreen extends ConsumerWidget {
-  const _ComingSoonScreen({required this.tab});
-
-  final String tab;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final language = ref.watch(languageProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(AppStrings.get(tab, language))),
-      body: Center(
-        child: Text(
-          AppStrings.get('coming_soon', language),
-          style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
     );

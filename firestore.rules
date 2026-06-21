@@ -1,62 +1,117 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isLoggedIn() { return request.auth != null; }
+    function isOwner(uid) { return isLoggedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return isLoggedIn() && request.auth.token.admin == true;
+    }
+    function isOperator() {
+      return isLoggedIn() &&
+        exists(/databases/$(database)/documents/gate_operators/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/gate_operators/$(request.auth.uid)).data.status == 'active';
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId) || isAdmin() || isOperator();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /transactions/{txId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == resource.data.user_id;
+      allow read: if isLoggedIn() && request.auth.uid == resource.data.user_id;
+      allow read: if isAdmin();
       allow write: if false;
     }
 
     match /vehicles/{vehicleId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == resource.data.owner_uid;
-      allow create: if request.auth != null &&
-        request.auth.uid == request.resource.data.owner_uid;
-      allow update: if request.auth != null &&
+      allow read: if (isLoggedIn() && request.auth.uid == resource.data.owner_uid) || isAdmin() || isOperator();
+      allow create: if isLoggedIn() && request.auth.uid == request.resource.data.owner_uid;
+      allow update: if isAdmin() || (
+        isLoggedIn() &&
         request.auth.uid == resource.data.owner_uid &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['brtc_status', 'brtc_data']);
-      allow delete: if request.auth != null &&
-        request.auth.uid == resource.data.owner_uid;
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['brtc_status', 'brtc_data'])
+      );
+      allow delete: if isLoggedIn() && request.auth.uid == resource.data.owner_uid;
     }
 
     match /toll_gates/{gateId} {
-      allow read: if request.auth != null;
-      allow write: if false;
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
     }
 
     match /toll_payments/{paymentId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == resource.data.user_id;
+      allow read: if (isLoggedIn() && request.auth.uid == resource.data.user_id) || isAdmin() || isOperator();
       allow write: if false;
     }
 
     match /passes/{passId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == resource.data.user_id;
+      allow read: if isLoggedIn() && request.auth.uid == resource.data.user_id;
+      allow read: if isAdmin();
       allow write: if false;
     }
 
     match /disputes/{disputeId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == resource.data.user_id;
-      allow create: if request.auth != null &&
-        request.auth.uid == request.resource.data.user_id;
-      allow update: if false;
+      allow read: if isLoggedIn() && request.auth.uid == resource.data.user_id;
+      allow read: if isAdmin();
+      allow create: if isLoggedIn() && request.auth.uid == request.resource.data.user_id;
+      allow update: if isAdmin();
     }
 
     match /offline_qr_tokens/{tokenId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == resource.data.user_id;
+      allow read: if isLoggedIn() && request.auth.uid == resource.data.user_id;
       allow write: if false;
     }
 
-    match /app_config/{doc} {
-      allow read: if request.auth != null;
+    match /gate_operators/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /gate_queue/{gateId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
+    }
+
+    match /analytics_daily/{docId} {
+      allow read: if isAdmin() || isOperator();
       allow write: if false;
+    }
+
+    match /family_accounts/{familyId} {
+      allow read: if isAdmin() || (
+        isLoggedIn() && request.auth.uid in resource.data.member_uids
+      );
+      allow create: if isLoggedIn() && request.auth.uid == request.resource.data.owner_uid;
+      allow update: if isAdmin() || (
+        isLoggedIn() &&
+        request.auth.uid in resource.data.member_uids &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['shared_wallet', 'updated_at'])
+      );
+      allow delete: if false;
+    }
+
+    match /notifications_log/{notifId} {
+      allow read: if isLoggedIn() && request.auth.uid == resource.data.user_id;
+      allow update: if isLoggedIn() &&
+        request.auth.uid == resource.data.user_id &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['is_read', 'read_at']);
+      allow create, delete: if false;
+    }
+
+    match /nid_verifications/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /admin_notifications/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /app_config/{docId} {
+      allow read: if isLoggedIn();
+      allow write: if isAdmin();
     }
   }
 }

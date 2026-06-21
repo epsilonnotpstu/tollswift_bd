@@ -241,6 +241,25 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     ),
                     onTap: () => context.push('/pay/nearby-gates'),
                   ),
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      language == 'bn'
+                          ? 'রুট ধরে টোল হিসাব করুন'
+                          : 'Estimate tolls by route',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    onTap: () => context.push('/pay/estimator'),
+                  ),
                   Row(
                     children: [
                       Expanded(

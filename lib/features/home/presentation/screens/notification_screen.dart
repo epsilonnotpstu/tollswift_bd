@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../domain/notification_log_model.dart';
+import '../providers/home_provider.dart';
 
 class NotificationScreen extends ConsumerWidget {
   const NotificationScreen({super.key});
@@ -14,17 +15,19 @@ class NotificationScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final language = ref.watch(languageProvider);
+    final notificationsAsync = ref.watch(notificationsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: ListView(
+        child: Column(
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
                 AppSpacing.lg,
                 AppSpacing.lg,
-                AppSpacing.xl,
+                AppSpacing.md,
               ),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -40,73 +43,78 @@ class NotificationScreen extends ConsumerWidget {
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white.withValues(alpha: 0.15),
                     ),
-                    icon: const Icon(Icons.arrow_back,
-                        color: Colors.white, size: 18),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      AppStrings.get('notifications', language),
+                      language == 'bn' ? 'বিজ্ঞপ্তি' : 'Notifications',
                       style: AppTextStyles.h3.copyWith(color: Colors.white),
                     ),
                   ),
                   TextButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.done_all_rounded,
-                        color: Colors.white, size: 14),
+                    onPressed: () async {
+                      await ref.read(notificationActionsProvider).markAllAsRead();
+                    },
+                    icon: const Icon(Icons.done_all_rounded, color: Colors.white, size: 14),
                     label: Text(
-                      'Mark all read',
-                      style:
-                          AppTextStyles.bodySmall.copyWith(color: Colors.white),
+                      language == 'bn' ? 'সব পড়া' : 'Mark all read',
+                      style: AppTextStyles.bodySmall.copyWith(color: Colors.white),
                     ),
                   ),
                 ],
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.sm,
-              ),
-              child: _SectionHeader(title: 'Today', badge: '1 new'),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: _NotificationTile(
-                emoji: '💰',
-                title: 'ওয়ালেটে টাকা যোগ হয়েছে',
-                subtitle: '৳500 সফলভাবে যোগ হয়েছে',
-                unread: true,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.sm,
-              ),
-              child: _SectionHeader(title: 'This Week'),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: Column(
-                children: [
-                  _NotificationTile(
-                    emoji: '✅',
-                    title: 'Toll paid successfully',
-                    subtitle: 'Jamuna Bridge · ৳60',
-                  ),
-                  SizedBox(height: AppSpacing.sm),
-                  _NotificationTile(
-                    emoji: '🎁',
-                    title: 'Monthly pass offer',
-                    subtitle: 'Save up to 10% this month',
-                  ),
-                ],
+            Expanded(
+              child: notificationsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text(error.toString())),
+                data: (notifications) {
+                  if (notifications.isEmpty) {
+                    return Center(
+                      child: Text(
+                        language == 'bn' ? 'কোনো বিজ্ঞপ্তি নেই' : 'No notifications yet',
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    );
+                  }
+
+                  final today = <NotificationLogModel>[];
+                  final yesterday = <NotificationLogModel>[];
+                  final older = <NotificationLogModel>[];
+                  final now = DateTime.now();
+
+                  for (final item in notifications) {
+                    final diff = now.difference(item.createdAt).inHours;
+                    if (diff < 24) {
+                      today.add(item);
+                    } else if (diff < 48) {
+                      yesterday.add(item);
+                    } else {
+                      older.add(item);
+                    }
+                  }
+
+                  return ListView(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    children: [
+                      if (today.isNotEmpty) ...[
+                        _SectionHeader(title: language == 'bn' ? 'আজ' : 'Today'),
+                        ...today.map((item) => _NotificationTile(item: item)),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+                      if (yesterday.isNotEmpty) ...[
+                        _SectionHeader(title: language == 'bn' ? 'গতকাল' : 'Yesterday'),
+                        ...yesterday.map((item) => _NotificationTile(item: item)),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+                      if (older.isNotEmpty) ...[
+                        _SectionHeader(title: language == 'bn' ? 'আগেরগুলো' : 'Earlier'),
+                        ...older.map((item) => _NotificationTile(item: item)),
+                      ],
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -117,101 +125,154 @@ class NotificationScreen extends ConsumerWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.badge});
+  const _SectionHeader({required this.title});
+
   final String title;
-  final String? badge;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          title.toUpperCase(),
-          style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Text(
+        title,
+        style: AppTextStyles.bodySmall.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColors.textSecondary,
         ),
-        const SizedBox(width: AppSpacing.sm),
-        const Expanded(
-          child: Divider(color: AppColors.cardBorder, thickness: 1),
-        ),
-        if (badge != null) ...[
-          const SizedBox(width: AppSpacing.sm),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(99),
-            ),
-            child: Text(
-              badge!,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
 
-class _NotificationTile extends StatelessWidget {
-  const _NotificationTile({
-    required this.emoji,
-    required this.title,
-    required this.subtitle,
-    this.unread = false,
-  });
+class _NotificationTile extends ConsumerWidget {
+  const _NotificationTile({required this.item});
 
-  final String emoji;
-  final String title;
-  final String subtitle;
-  final bool unread;
+  final NotificationLogModel item;
+
+  (String emoji, Color color, Color bg) _typeMeta(String type) {
+    switch (type) {
+      case 'wallet_credit':
+        return ('💰', AppColors.success, AppColors.successBg);
+      case 'toll_payment':
+        return ('🛣️', AppColors.warning, AppColors.warningBg);
+      case 'low_balance':
+        return ('⚠️', AppColors.error, AppColors.errorBg);
+      case 'pass_expiry':
+        return ('📋', const Color(0xFFB45309), const Color(0xFFFFF7ED));
+      case 'dispute_update':
+        return ('✅', AppColors.info, AppColors.infoBg);
+      default:
+        return ('📢', AppColors.textSecondary, AppColors.surfaceVariant);
+    }
+  }
+
+  Future<void> _onTap(BuildContext context, WidgetRef ref) async {
+    await ref.read(notificationActionsProvider).markAsRead(item.id);
+    if (!context.mounted) return;
+
+    switch (item.type) {
+      case 'toll_payment':
+        final paymentId = item.data['paymentId']?.toString() ??
+            item.data['payment_id']?.toString() ??
+            item.data['reference_id']?.toString();
+        if (paymentId != null && paymentId.isNotEmpty) {
+          context.push('/history/receipt?paymentId=$paymentId');
+          return;
+        }
+        return;
+      case 'wallet_credit':
+      case 'low_balance':
+        context.push('/wallet/add');
+        return;
+      case 'pass_expiry':
+        context.push('/passes/store');
+        return;
+      case 'dispute_update':
+        context.push('/history');
+        return;
+      default:
+        return;
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: unread ? const Color(0xFFF2FAF6) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: unread ? const Color(0x3310B981) : AppColors.cardBorder,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final language = ref.watch(languageProvider);
+    final meta = _typeMeta(item.type);
+
+    return InkWell(
+      onTap: () => _onTap(context, ref),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: item.isRead ? Colors.white : meta.$3,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: item.isRead ? AppColors.cardBorder : meta.$2.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(meta.$1, style: const TextStyle(fontSize: 18)),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    language == 'bn' ? item.titleBn : item.title,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    language == 'bn' ? item.bodyBn : item.body,
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _timeAgo(item.createdAt, language),
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!item.isRead) const Icon(Icons.circle, size: 8, color: AppColors.primary),
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 20)),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 2),
-                Text(subtitle, style: AppTextStyles.bodySmall),
-              ],
-            ),
-          ),
-          if (unread)
-            const Icon(Icons.circle, size: 8, color: AppColors.primary),
-        ],
-      ),
     );
+  }
+
+  String _timeAgo(DateTime time, String language) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 1) return language == 'bn' ? 'এখনই' : 'just now';
+    if (diff.inHours < 1) {
+      return language == 'bn'
+          ? '${diff.inMinutes} মিনিট আগে'
+          : '${diff.inMinutes} min ago';
+    }
+    if (diff.inHours < 24) {
+      return language == 'bn'
+          ? '${diff.inHours} ঘন্টা আগে'
+          : '${diff.inHours}h ago';
+    }
+    return language == 'bn' ? '${diff.inDays} দিন আগে' : '${diff.inDays}d ago';
   }
 }

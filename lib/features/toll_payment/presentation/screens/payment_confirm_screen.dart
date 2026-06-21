@@ -114,6 +114,7 @@ class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
     final needBiometric =
         ref.watch(currentUserProfileProvider).valueOrNull?.biometricEnabled ??
             false;
+    final queueAsync = ref.watch(gateQueueProvider(gate.id));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -250,6 +251,81 @@ class _PaymentConfirmScreenState extends ConsumerState<PaymentConfirmScreen> {
                 style: AppTextStyles.amountSmall,
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          queueAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (queue) {
+              if (queue == null) return const SizedBox.shrink();
+              final estimatedWait = queue.averageWaitMinutes;
+              return Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.infoBg,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      language == 'bn'
+                          ? '${gate.name} গেটে এখন ${queue.queueCount}টি গাড়ি অপেক্ষায়'
+                          : '${queue.queueCount} vehicles waiting at ${gate.nameEn}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.info,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      language == 'bn'
+                          ? 'আপনার আনুমানিক অপেক্ষা: $estimatedWait মিনিট'
+                          : 'Estimated wait: $estimatedWait minutes',
+                      style: AppTextStyles.bodySmall,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => context.push('/pay/nearby-gates'),
+                            child: Text(
+                              language == 'bn'
+                                  ? 'অন্য গেট বেছে নিন'
+                                  : 'Choose another gate',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: FilledButton.tonal(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    language == 'bn'
+                                        ? 'বর্তমান গেটেই পেমেন্ট চালিয়ে যাবে'
+                                        : 'Continuing payment on current gate',
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              language == 'bn'
+                                  ? 'তবুও পেমেন্ট করুন'
+                                  : 'Pay anyway',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.sm),
           if (insufficient)

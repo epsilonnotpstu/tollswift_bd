@@ -38,6 +38,7 @@ const admin = __importStar(require("firebase-admin"));
 const crypto_1 = require("crypto");
 const functions = __importStar(require("firebase-functions"));
 const verifyTollGate_1 = require("./verifyTollGate");
+const notificationHelper_1 = require("../notifications/notificationHelper");
 function normalizePayload(rawData) {
     const wrapper = rawData;
     return (wrapper?.data ?? rawData);
@@ -160,17 +161,33 @@ exports.processTollPayment = functions.https.onCall(async (rawData, context) => 
         status: "open",
     });
     const userDoc = await userRef.get();
-    const fcmToken = userDoc.data()?.fcm_token;
-    if (fcmToken) {
-        await admin.messaging().send({
-            token: fcmToken,
-            notification: {
-                title: "টোল পরিশোধ সম্পন্ন ✓",
-                body: `৳${(tollAmount / 100).toFixed(2)} কাটা হয়েছে`,
-            },
+    const userData = userDoc.data() ?? {};
+    await (0, notificationHelper_1.sendPushAndLog)({
+        userId,
+        type: "toll_payment",
+        title: "Toll payment completed",
+        titleBn: "টোল পরিশোধ সম্পন্ন ✓",
+        body: `৳${(tollAmount / 100).toFixed(2)} deducted for ${gate.name}.`,
+        bodyBn: `${gate.name} এর জন্য ৳${(tollAmount / 100).toFixed(2)} কাটা হয়েছে`,
+        data: {
+            paymentId: paymentRef.id,
+            gateId: gateRef.id,
+            amount: tollAmount,
+            balanceAfter,
+        },
+    });
+    const lowBalanceThreshold = Number(userData.low_balance_threshold ?? userData.lowBalanceThreshold ?? 2000);
+    if (balanceAfter <= lowBalanceThreshold) {
+        await (0, notificationHelper_1.sendPushAndLog)({
+            userId,
+            type: "low_balance",
+            title: "Low wallet balance",
+            titleBn: "ওয়ালেট ব্যালেন্স কম",
+            body: "Please add money to avoid toll payment failures.",
+            bodyBn: "টোল পরিশোধে সমস্যা এড়াতে ওয়ালেটে টাকা যোগ করুন।",
             data: {
-                type: "toll_payment",
-                payment_id: paymentRef.id,
+                balance: balanceAfter,
+                threshold: lowBalanceThreshold,
             },
         });
     }

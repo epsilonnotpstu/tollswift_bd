@@ -25,6 +25,7 @@ class HomeScreen extends ConsumerWidget {
     final recentTransactions =
         ref.watch(recentTransactionsProvider).valueOrNull ?? const [];
     final greeting = ref.watch(greetingProvider);
+    final unreadNotifications = ref.watch(unreadNotificationCountProvider);
     final displayName = language == 'bn'
         ? (profile?.nameBn.isNotEmpty == true
             ? profile!.nameBn
@@ -84,16 +85,44 @@ class HomeScreen extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                            IconButton(
-                              onPressed: () => context.push('/notifications'),
-                              style: IconButton.styleFrom(
-                                backgroundColor:
-                                    Colors.white.withValues(alpha: 0.15),
-                              ),
-                              icon: const Icon(
-                                Icons.notifications_none_rounded,
-                                color: Colors.white,
-                              ),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                IconButton(
+                                  onPressed: () => context.push('/notifications'),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.white.withValues(alpha: 0.15),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.notifications_none_rounded,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                if (unreadNotifications > 0)
+                                  Positioned(
+                                    right: 4,
+                                    top: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 1),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accent,
+                                        borderRadius: BorderRadius.circular(99),
+                                      ),
+                                      child: Text(
+                                        unreadNotifications > 99
+                                            ? '99+'
+                                            : unreadNotifications.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ],
                         ),
@@ -427,6 +456,23 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  0,
+                ),
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push('/pay/estimator'),
+                  icon: const Icon(Icons.alt_route_rounded),
+                  label: Text(
+                    language == 'bn'
+                        ? 'যাত্রাপথ পরিকল্পনাকারী'
+                        : 'Route Toll Estimator',
                   ),
                 ),
               ),

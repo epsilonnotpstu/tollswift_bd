@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "gates": {
+      "$gateId": {
+        ".read": "auth != null",
+        "status": {
+          ".write": "auth != null && auth.token.admin === true"
+        },
+        "open_signal": {
+          ".write": false
+        },
+        "queue_count": {
+          ".read": "auth != null",
+          ".write": false
+        }
+      }
+    }
+  }
+}

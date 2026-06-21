@@ -40,6 +40,7 @@ exports.sslcommerzIPN = void 0;
 const axios_1 = __importDefault(require("axios"));
 const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions"));
+const notificationHelper_1 = require("../notifications/notificationHelper");
 exports.sslcommerzIPN = functions.https.onRequest(async (req, res) => {
     try {
         const body = req.body;
@@ -93,18 +94,18 @@ exports.sslcommerzIPN = functions.https.onRequest(async (req, res) => {
                 updated_at: admin.firestore.FieldValue.serverTimestamp(),
             });
         });
-        const userDoc = await userRef.get();
-        const fcmToken = userDoc.data()?.fcm_token;
-        if (fcmToken) {
-            await admin.messaging().send({
-                token: fcmToken,
-                notification: {
-                    title: "ওয়ালেটে টাকা যোগ হয়েছে! 💰",
-                    body: `৳${(tx.amount / 100).toFixed(2)} সফলভাবে যোগ হয়েছে`,
-                },
-                data: { type: "wallet_credit", transaction_id: tranId },
-            });
-        }
+        await (0, notificationHelper_1.sendPushAndLog)({
+            userId: tx.user_id,
+            type: "wallet_credit",
+            title: "Wallet credited",
+            titleBn: "ওয়ালেটে টাকা যোগ হয়েছে! 💰",
+            body: `BDT ${(tx.amount / 100).toFixed(2)} has been added to your wallet.`,
+            bodyBn: `৳${(tx.amount / 100).toFixed(2)} সফলভাবে যোগ হয়েছে`,
+            data: {
+                transactionId: tranId,
+                amount: tx.amount,
+            },
+        });
         res.status(200).send("IPN processed");
     }
     catch (error) {

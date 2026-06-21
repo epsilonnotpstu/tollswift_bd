@@ -17,6 +17,14 @@
       ]
     },
     {
+      "collectionGroup": "vehicles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "brtc_status", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "toll_payments",
       "queryScope": "COLLECTION",
       "fields": [
@@ -43,6 +51,15 @@
       ]
     },
     {
+      "collectionGroup": "passes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "auto_renew", "order": "ASCENDING" },
+        { "fieldPath": "valid_until", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "disputes",
       "queryScope": "COLLECTION",
       "fields": [
@@ -55,7 +72,23 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "created_at", "order": "ASCENDING" }
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications_log",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "analytics_daily",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "gate_id", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
       ]
     }
   ],

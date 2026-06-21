@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -29,6 +30,7 @@ class _TollPaymentSuccessScreenState
     extends ConsumerState<TollPaymentSuccessScreen> {
   Timer? _timer;
   int _secondsLeft = 8;
+  bool _ratingPromptChecked = false;
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _TollPaymentSuccessScreenState
   @override
   Widget build(BuildContext context) {
     final language = ref.watch(languageProvider);
+    final tollPayments = ref.watch(tollPaymentsProvider).valueOrNull ?? const [];
     final pid = widget.paymentId.isEmpty
         ? (ref.read(lastTollPaymentIdProvider) ?? '')
         : widget.paymentId;
@@ -70,6 +73,16 @@ class _TollPaymentSuccessScreenState
             final balance = payment?.balanceAfter ?? 0;
             final createdAt = payment?.createdAt ?? DateTime.now();
             final txId = payment?.id ?? pid;
+
+            if (!_ratingPromptChecked) {
+              _ratingPromptChecked = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _maybeShowRatingPrompt(
+                  paymentCount: tollPayments.length,
+                  language: language,
+                );
+              });
+            }
 
             return ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -136,7 +149,7 @@ class _TollPaymentSuccessScreenState
                         trailing: IconButton(
                           onPressed: () async {
                             await Clipboard.setData(ClipboardData(text: txId));
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(language == 'bn'
@@ -179,6 +192,49 @@ class _TollPaymentSuccessScreenState
         ),
       ),
     );
+  }
+
+  Future<void> _maybeShowRatingPrompt({
+    required int paymentCount,
+    required String language,
+  }) async {
+    if (!mounted || paymentCount < 5) return;
+    final prefs = ref.read(sharedPreferencesProvider);
+    final alreadyPrompted = prefs.getBool('rating_prompt_shown') ?? false;
+    if (alreadyPrompted) return;
+
+    final shouldOpenStore = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(language == 'bn' ? 'TollBD কেমন লাগছে?' : 'Enjoying TollBD?'),
+          content: Text(
+            language == 'bn'
+                ? '৫ম টোল পেমেন্ট সম্পন্ন হয়েছে। আমাদেরকে রেটিং দিলে অনেক সাহায্য হবে।'
+                : 'You completed your 5th toll payment. A quick rating helps us a lot.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(language == 'bn' ? 'পরে' : 'Later'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(language == 'bn' ? 'রেটিং দিন' : 'Rate now'),
+            ),
+          ],
+        );
+      },
+    );
+
+    await prefs.setBool('rating_prompt_shown', true);
+
+    if (shouldOpenStore == true) {
+      await launchUrl(
+        Uri.parse('https://play.google.com/store/apps/details?id=com.tollbd.app'),
+        mode: LaunchMode.externalApplication,
+      );
+    }
   }
 }
 

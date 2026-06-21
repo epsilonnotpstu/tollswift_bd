@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../vehicle/presentation/providers/vehicle_provider.dart';
 import '../../data/qr_service.dart';
 import '../../data/toll_repository.dart';
+import '../../domain/gate_queue_model.dart';
+import '../../domain/route_estimate_model.dart';
 import '../../domain/toll_gate_model.dart';
 import '../../domain/toll_payment_model.dart';
 
@@ -18,6 +20,11 @@ final tollGatesProvider = StreamProvider<List<TollGateModel>>((ref) {
 
 final tollPaymentsProvider = StreamProvider<List<TollPaymentModel>>((ref) {
   return ref.watch(tollRepositoryProvider).tollPaymentsStream();
+});
+
+final gateQueueProvider =
+    StreamProvider.family<GateQueueModel?, String>((ref, gateId) {
+  return ref.watch(tollRepositoryProvider).gateQueueStream(gateId);
 });
 
 final scannedQrPayloadProvider = StateProvider<String?>((ref) => null);
@@ -82,6 +89,22 @@ class TollActionsController {
         );
     ref.invalidate(offlineQrTokensProvider);
     return token;
+  }
+
+  Future<RouteEstimateModel> estimateRouteTolls({
+    required double originLat,
+    required double originLng,
+    required double destLat,
+    required double destLng,
+    required String vehicleType,
+  }) {
+    return ref.read(tollRepositoryProvider).estimateRouteTolls(
+          originLat: originLat,
+          originLng: originLng,
+          destLat: destLat,
+          destLng: destLng,
+          vehicleType: vehicleType,
+        );
   }
 }
 
