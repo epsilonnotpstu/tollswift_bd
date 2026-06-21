@@ -85,13 +85,14 @@ class _BootstrapErrorScreen extends StatelessWidget {
 
   final Object error;
   final StackTrace? stackTrace;
+  // to do
 
   @override
   Widget build(BuildContext context) {
     final errorText = error.toString();
     final lowerError = errorText.toLowerCase();
-    final isDuplicateFirebaseApp =
-        lowerError.contains('duplicate-app') || lowerError.contains('already exists');
+    final isDuplicateFirebaseApp = lowerError.contains('duplicate-app') ||
+        lowerError.contains('already exists');
     final isFirebaseConfigIssue =
         errorText.contains('replace-with-flutterfire-config') ||
             lowerError.contains('missingpluginexception');
@@ -129,8 +130,8 @@ class _BootstrapErrorScreen extends StatelessWidget {
                         isDuplicateFirebaseApp
                             ? 'Firebase was initialized more than once. The app now guards this, so please restart the app fully.'
                             : isFirebaseConfigIssue
-                            ? 'Firebase config is missing/invalid. Run flutterfire configure and restart the app.'
-                            : 'The app failed to initialize. Check the error below and runtime logs.',
+                                ? 'Firebase config is missing/invalid. Run flutterfire configure and restart the app.'
+                                : 'The app failed to initialize. Check the error below and runtime logs.',
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -162,4 +163,3 @@ class _BootstrapErrorScreen extends StatelessWidget {
     );
   }
 }
-
