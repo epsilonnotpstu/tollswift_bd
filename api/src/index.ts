@@ -3,6 +3,7 @@ import { env } from './config/env';
 import { logger } from './config/logger';
 import { app } from './app';
 import { prisma } from './config/database';
+import { scheduleCleanup } from './utils/db-cleanup';
 
 process.on('uncaughtException', (err) => {
   logger.error('Uncaught exception', { err });
@@ -17,8 +18,9 @@ process.on('unhandledRejection', (reason) => {
 const start = async () => {
   await prisma.$connect();
   logger.info(`Connected to database (${env.NODE_ENV})`);
+  scheduleCleanup();
 
-  const server = app.listen(env.PORT, () => {
+  const server = app.listen(env.PORT, '0.0.0.0', () => {
     logger.info(`TollBD API running on port ${env.PORT} [${env.NODE_ENV}]`);
   });
 

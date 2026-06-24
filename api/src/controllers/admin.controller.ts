@@ -95,6 +95,22 @@ export const getUsers = async (req: Request, res: Response) => {
   return success(res, { items, total, page: query.page, limit: query.limit });
 };
 
+export const getUserById = async (req: Request, res: Response) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: req.params.id },
+    select: {
+      id: true, email: true, phone: true, fullName: true, photoUrl: true,
+      role: true, status: true, emailVerified: true, division: true, district: true,
+      emergencyContact: true, nidNumber: true, createdAt: true, updatedAt: true,
+      wallet: { select: { balance: true } },
+      _count: { select: { vehicles: true, transactions: true } },
+      vehicles: { select: { id: true, registrationNumber: true, vehicleType: true, vehicleCategory: true, status: true, createdAt: true }, orderBy: { createdAt: 'desc' } },
+      transactions: { where: { type: 'TOLL_PAYMENT' }, select: { id: true, amount: true, bridgeName: true, vehiclePlate: true, status: true, paymentMethod: true, createdAt: true }, orderBy: { createdAt: 'desc' }, take: 10 }
+    }
+  });
+  return success(res, user);
+};
+
 export const blockUser = async (req: Request, res: Response) => {
   const user = await prisma.user.update({
     where: { id: req.params.id },

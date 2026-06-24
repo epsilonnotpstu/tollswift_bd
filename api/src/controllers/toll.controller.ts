@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { env } from '../config/env';
 import { tollCalculateSchema, transactionFilterSchema } from '../schemas/toll.schema';
 import * as tollService from '../services/toll.service';
+import { generateReceiptPDF } from '../services/pdf.service';
 import { success } from '../utils/response';
 
 export const calculateToll = async (req: Request, res: Response) => {
@@ -40,4 +41,12 @@ export const adminGetTransactions = async (req: Request, res: Response) => {
 export const refundTransaction = async (req: Request, res: Response) => {
   const transaction = await tollService.processRefund(req.params.id, req.user!.id, req.body.reason, req.body.amount);
   return success(res, transaction, 'Refund processed');
+};
+
+export const downloadReceipt = async (req: Request, res: Response) => {
+  const pdf = await generateReceiptPDF(req.params.id, req.user!.id);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="tollbd-receipt-${req.params.id.slice(0, 8)}.pdf"`);
+  res.setHeader('Cache-Control', 'private, no-cache');
+  return res.send(pdf);
 };

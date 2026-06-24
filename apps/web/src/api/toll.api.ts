@@ -23,3 +23,15 @@ export const getTransactions = (page = 1, limit = 20, status?: string) => {
 };
 
 export const getTransaction = (id: string) => apiClient.get(`/transactions/${id}`).then(unwrap<Transaction>);
+
+export const downloadReceiptPDF = async (transactionId: string): Promise<void> => {
+  const response = await apiClient.get(`/transactions/${transactionId}/receipt`, { responseType: 'blob' });
+  const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tollbd-receipt-${transactionId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
