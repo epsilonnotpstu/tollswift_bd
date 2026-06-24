@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as controller from '../controllers/user.controller';
+import * as adminController from '../controllers/admin.controller';
 import { requireAuth } from '../middleware/auth.middleware';
 import { profilePhotoUpload } from '../middleware/upload.middleware';
 import { validate } from '../middleware/validate.middleware';
@@ -12,3 +13,4 @@ userRoutes.get('/me', controller.getMe);
 userRoutes.patch('/me', validate(updateMeSchema), controller.updateMe);
 userRoutes.post('/me/photo', profilePhotoUpload, controller.uploadPhoto);
 userRoutes.delete('/me', controller.deleteMe);
+userRoutes.get('/announcements', adminController.getAnnouncements);

@@ -1,16 +1,15 @@
 import { User } from './auth.types';
 
 export interface DashboardStats {
-  totalUsers: number;
-  totalVehicles: number;
-  totalRevenue: number;
-  todayRevenue: number;
-  pendingVehicles: number;
-  activeBridges: number;
+  todayRevenuePaisa: number;
+  todayTransactionCount: number;
+  totalActiveUsers: number;
+  pendingVehicleCount: number;
+  weeklyRevenue: Array<{ date: string; amountPaisa: number }>;
+  paymentMethodBreakdown: Record<string, number>;
 }
 
 export interface AdminUser extends User {
-  vehicleCount?: number;
-  transactionCount?: number;
-  walletBalance?: number;
+  _count?: { vehicles: number; transactions: number };
+  wallet?: { balance: number } | null;
 }

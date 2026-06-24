@@ -52,7 +52,8 @@ export const refundTransaction = (id: string, reason: string, amount?: number) =
 
 export const scanQR = (tokenData: string, bridgeId: string) => apiClient.post('/qr/scan', { tokenData, bridgeId }).then(unwrap<QRScanResponse>);
 
-export const getAnnouncements = () => apiClient.get('/admin/announcements').then(unwrap<Announcement[]>);
+export const getAnnouncements = (adminMode = false) =>
+  apiClient.get(adminMode ? '/admin/announcements' : '/users/announcements').then(unwrap<Announcement[]>);
 
 export const createAnnouncement = (data: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt' | 'createdById' | 'isActive'> & { expiresAt?: string }) => {
   return apiClient.post('/admin/announcements', data).then(unwrap<Announcement>);

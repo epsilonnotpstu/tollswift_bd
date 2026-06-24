@@ -1,6 +1,14 @@
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { BottomNav } from '@/components/shared';
 import { useAuthStore } from '@/store/authStore';
+import { AdminLoginPage } from '@/pages/admin/AdminLoginPage';
+import { AdminLayout } from '@/pages/admin/AdminLayout';
+import { AdminDashboard } from '@/pages/admin/AdminDashboard';
+import { AdminVehiclesPage } from '@/pages/admin/AdminVehiclesPage';
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
+import { AdminBridgesPage } from '@/pages/admin/AdminBridgesPage';
+import { AdminTransactionsPage } from '@/pages/admin/AdminTransactionsPage';
+import { AdminAnnouncementsPage } from '@/pages/admin/AdminAnnouncementsPage';
 import { SplashPage } from '@/pages/user/auth/SplashPage';
 import { OnboardingPage } from '@/pages/user/auth/OnboardingPage';
 import { LoginPage } from '@/pages/user/auth/LoginPage';
@@ -23,16 +31,6 @@ import { MyQRPage } from '@/pages/user/qr/MyQRPage';
 import { ScanPage } from '@/pages/user/qr/ScanPage';
 import { ProfilePage } from '@/pages/user/profile/ProfilePage';
 import { NotificationSettingsPage } from '@/pages/user/profile/NotificationSettingsPage';
-
-const Page = ({ title }: { title: string }) => (
-  <main className="min-h-screen bg-bg px-5 py-8 font-bengali text-text-primary">
-    <section className="mx-auto flex max-w-md flex-col gap-3">
-      <div className="text-sm font-semibold text-primary">TollBD</div>
-      <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="text-sm text-text-secondary">এই admin screen পরের prompt-এ পূর্ণ করা হবে।</p>
-    </section>
-  </main>
-);
 
 const ProtectedRoute = () => {
   const { isAuthenticated } = useAuthStore();
@@ -62,7 +60,7 @@ const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/otp', element: <OTPPage /> },
   { path: '/register', element: <RegisterPage /> },
-  { path: '/admin/login', element: <Page title="Admin Login" /> },
+  { path: '/admin/login', element: <AdminLoginPage /> },
   {
     element: <ProtectedRoute />,
     children: [
@@ -97,16 +95,19 @@ const router = createBrowserRouter([
   {
     element: <AdminRoute />,
     children: [
-      { path: '/admin', element: <Navigate to="/admin/dashboard" replace /> },
-      { path: '/admin/dashboard', element: <Page title="Admin Dashboard" /> },
-      { path: '/admin/users', element: <Page title="Admin Users" /> },
-      { path: '/admin/users/:id', element: <Page title="Admin User Detail" /> },
-      { path: '/admin/vehicles', element: <Page title="Admin Vehicles" /> },
-      { path: '/admin/bridges', element: <Page title="Admin Bridges" /> },
-      { path: '/admin/toll-rates', element: <Page title="Admin Toll Rates" /> },
-      { path: '/admin/transactions', element: <Page title="Admin Transactions" /> },
-      { path: '/admin/scanner', element: <ScanPage /> },
-      { path: '/admin/announcements', element: <Page title="Admin Announcements" /> }
+      {
+        element: <AdminLayout />,
+        children: [
+          { path: '/admin', element: <Navigate to="/admin/dashboard" replace /> },
+          { path: '/admin/dashboard', element: <AdminDashboard /> },
+          { path: '/admin/users', element: <AdminUsersPage /> },
+          { path: '/admin/vehicles', element: <AdminVehiclesPage /> },
+          { path: '/admin/bridges', element: <AdminBridgesPage /> },
+          { path: '/admin/transactions', element: <AdminTransactionsPage /> },
+          { path: '/admin/scanner', element: <ScanPage /> },
+          { path: '/admin/announcements', element: <AdminAnnouncementsPage /> }
+        ]
+      }
     ]
   },
   { path: '*', element: <Navigate to="/splash" replace /> }
