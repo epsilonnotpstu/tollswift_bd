@@ -3,7 +3,12 @@ import { prisma } from '../config/database';
 import { env } from '../config/env';
 import { AppError } from '../middleware/error.middleware';
 
-const resend = new Resend(env.RESEND_API_KEY);
+const getResend = () => {
+  if (!env.RESEND_API_KEY) {
+    throw new AppError('Email service not configured (RESEND_API_KEY missing)', 503, 'EMAIL_SERVICE_UNAVAILABLE');
+  }
+  return new Resend(env.RESEND_API_KEY);
+};
 
 export const generateOTP = () => String(Math.floor(100000 + Math.random() * 900000));
 
@@ -54,7 +59,7 @@ export const verifyOTP = async (userId: string, code: string) => {
 };
 
 export const sendOTPEmail = async (email: string, code: string, name: string) => {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: env.RESEND_FROM_EMAIL,
     to: email,
     subject: 'TollBD - আপনার OTP কোড',
