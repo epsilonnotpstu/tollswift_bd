@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1B4FDB;
+  --color-primary-50: #EEF2FF;
+  --color-secondary: #00A86B;
+  --color-accent: #F5A623;
+  --color-bg: #F8F9FD;
+  --color-surface: #FFFFFF;
+  --color-border: #E4E9F5;
+  --color-text-primary: #0F1729;
+  --color-text-secondary: #5C6B8A;
+  --color-text-muted: #8A97B5;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --font-bengali: 'Hind Siliguri', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: Inter, 'Hind Siliguri', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.font-bengali {
+  font-family: var(--font-bengali);
+}

@@ -1,0 +1,3 @@
+resend api=re_SYt6joLX_6m1kyxUev1Vh6tBwwL2GQwTH
+Store ID: testt692d0f10c9f45Store 
+Password (API/Secret Key): testt692d0f10c9f45@ssl

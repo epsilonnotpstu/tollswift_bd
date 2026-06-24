@@ -1,0 +1,26 @@
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
+
+@import 'tw-animate-css';
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-bengali {
+  font-family: 'Hind Siliguri', sans-serif;
+}
+
+.font-mono-custom {
+  font-family: 'JetBrains Mono', monospace;
+}
