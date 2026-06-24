@@ -12,3 +12,5 @@ prisma/migrations/
 logs/
 .vite/
 coverage/
+doc/databse_postgsl_env.txt
+doc/tollswift_env.txt
