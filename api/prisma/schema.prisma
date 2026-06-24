@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
 enum Role {
   USER
   ADMIN
@@ -28,12 +32,12 @@ enum VehicleType {
 }
 
 enum VehicleCategory {
-  A
-  B
-  C
-  D
-  E
-  F
+  A   // Motorbike
+  B   // Car / Jeep
+  C   // Microbus / Minibus
+  D   // Bus
+  E   // Small Truck
+  F   // Heavy Truck
 }
 
 enum VehicleStatus {
@@ -89,23 +93,29 @@ enum AnnouncementType {
   MAINTENANCE
 }
 
+// ─────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────
+
 model User {
-  id                String             @id @default(uuid())
-  email             String             @unique
-  phone             String?            @unique
-  passwordHash      String?
+  id                String    @id @default(uuid())
+  email             String    @unique
+  phone             String?   @unique
+  passwordHash      String?   // null for Google OAuth users
   fullName          String
   photoUrl          String?
   nidNumber         String?
-  role              Role               @default(USER)
-  status            UserStatus         @default(UNVERIFIED)
+  role              Role      @default(USER)
+  status            UserStatus @default(UNVERIFIED)
   division          String?
   district          String?
   emergencyContact  String?
-  googleId          String?            @unique
-  emailVerified     Boolean            @default(false)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  googleId          String?   @unique
+  emailVerified     Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
   otps              Otp[]
   wallet            Wallet?
   vehicles          Vehicle[]
@@ -118,27 +128,37 @@ model User {
   @@index([status])
 }
 
+// ─────────────────────────────────────────
+// OTP
+// ─────────────────────────────────────────
+
 model Otp {
-  id        String   @id @default(uuid())
-  userId    String
-  code      String
-  type      String   @default("email")
-  attempts  Int      @default(0)
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  userId      String
+  code        String   // 6-digit numeric
+  type        String   @default("email") // 'email' | 'phone'
+  attempts    Int      @default(0)  // max 3 wrong attempts
+  expiresAt   DateTime // now + 10 minutes
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([code])
 }
 
+// ─────────────────────────────────────────
+// WALLET
+// ─────────────────────────────────────────
+
 model Wallet {
-  id           String              @id @default(uuid())
-  userId       String              @unique
-  balance      Int                 @default(0)
-  updatedAt    DateTime            @updatedAt
-  user         User                @relation(fields: [userId], references: [id])
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  balance     Int      @default(0)  // STORED IN PAISA (100 paisa = 1 taka)
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
   transactions WalletTransaction[]
 
   @@index([userId])
@@ -147,107 +167,131 @@ model Wallet {
 model WalletTransaction {
   id          String   @id @default(uuid())
   walletId    String
-  type        String
-  amount      Int
+  type        String   // 'CREDIT' | 'DEBIT'
+  amount      Int      // in paisa
   description String
-  reference   String?
+  reference   String?  // transaction ID or SSL transaction ID
   createdAt   DateTime @default(now())
+
   wallet      Wallet   @relation(fields: [walletId], references: [id])
 
   @@index([walletId])
   @@index([createdAt])
 }
 
+// ─────────────────────────────────────────
+// VEHICLES
+// ─────────────────────────────────────────
+
 model Vehicle {
-  id                 String          @id @default(uuid())
-  ownerId            String
-  registrationNumber String          @unique
-  vehicleType        VehicleType
-  vehicleCategory    VehicleCategory
-  ownerName          String
-  fuelType           FuelType?
-  brtaCertNumber     String?
-  frontPhotoUrl      String?
-  backPhotoUrl       String?
-  status             VehicleStatus   @default(PENDING)
-  rejectionReason    String?
-  verifiedAt         DateTime?
-  verifiedById       String?
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  owner              User            @relation(fields: [ownerId], references: [id])
-  transactions       Transaction[]
-  qrTokens           QrToken[]
-  brtaVerified       Boolean?
-  brtaVerifiedAt     DateTime?
-  brtaData           Json?
+  id                  String          @id @default(uuid())
+  ownerId             String
+  registrationNumber  String          @unique
+  vehicleType         VehicleType
+  vehicleCategory     VehicleCategory
+  ownerName           String
+  fuelType            FuelType?
+  brtaCertNumber      String?
+  frontPhotoUrl       String?
+  backPhotoUrl        String?
+  status              VehicleStatus   @default(PENDING)
+  rejectionReason     String?
+  verifiedAt          DateTime?
+  verifiedById        String?         // admin user id
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  owner               User            @relation(fields: [ownerId], references: [id])
+  transactions        Transaction[]
+  qrTokens            QrToken[]
+
+  // BRTA verification result (null = not attempted)
+  brtaVerified        Boolean?
+  brtaVerifiedAt      DateTime?
+  brtaData            Json?           // raw BRTA API response stored here
 
   @@index([ownerId])
   @@index([status])
   @@index([registrationNumber])
 }
 
+// ─────────────────────────────────────────
+// BRIDGES
+// ─────────────────────────────────────────
+
 model Bridge {
-  id            String         @id @default(uuid())
-  name          String
-  nameBn        String
-  location      String
-  district      String
-  latitude      Float
-  longitude     Float
-  category      BridgeCategory
-  status        BridgeStatus   @default(ACTIVE)
-  imageUrl      String?
-  authorityName String
-  hasFastpass   Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  tollRate      TollRate?
-  transactions  Transaction[]
+  id              String         @id @default(uuid())
+  name            String         // English name
+  nameBn          String         // Bengali name
+  location        String
+  district        String
+  latitude        Float
+  longitude       Float
+  category        BridgeCategory
+  status          BridgeStatus   @default(ACTIVE)
+  imageUrl        String?
+  authorityName   String         // e.g. "Bangladesh Bridge Authority"
+  hasFastpass     Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  tollRate        TollRate?
+  transactions    Transaction[]
 
   @@index([status])
   @@index([category])
 }
 
+// ─────────────────────────────────────────
+// TOLL RATES
+// ─────────────────────────────────────────
+
 model TollRate {
-  id            String   @id @default(uuid())
-  bridgeId      String   @unique
-  rateA         Int
-  rateB         Int
-  rateC         Int
-  rateD         Int
-  rateE         Int
-  rateF         Int
-  effectiveFrom DateTime @default(now())
-  updatedById   String
-  updatedAt     DateTime @updatedAt
-  bridge        Bridge   @relation(fields: [bridgeId], references: [id])
+  id              String   @id @default(uuid())
+  bridgeId        String   @unique
+  // Rates stored in PAISA per category
+  rateA           Int      // Motorbike
+  rateB           Int      // Car
+  rateC           Int      // Microbus
+  rateD           Int      // Bus
+  rateE           Int      // Small Truck
+  rateF           Int      // Heavy Truck
+  effectiveFrom   DateTime @default(now())
+  updatedById     String   // admin user id
+  updatedAt       DateTime @updatedAt
+
+  bridge          Bridge   @relation(fields: [bridgeId], references: [id])
 
   @@index([bridgeId])
 }
 
+// ─────────────────────────────────────────
+// TRANSACTIONS
+// ─────────────────────────────────────────
+
 model Transaction {
-  id               String            @id @default(uuid())
-  userId           String
-  vehicleId        String
-  vehiclePlate     String
-  bridgeId         String
-  bridgeName       String
-  amount           Int
-  paymentMethod    PaymentMethod
-  type             TransactionType
-  status           TransactionStatus @default(PENDING)
-  sslTransactionId String?
-  sslSessionKey    String?
-  refundReason     String?
-  refundedAt       DateTime?
-  receiptUrl       String?
-  metadata         Json?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  user             User              @relation(fields: [userId], references: [id])
-  vehicle          Vehicle           @relation(fields: [vehicleId], references: [id])
-  bridge           Bridge            @relation(fields: [bridgeId], references: [id])
+  id                  String            @id @default(uuid())
+  userId              String
+  vehicleId           String
+  vehiclePlate        String            // denormalized for history display
+  bridgeId            String
+  bridgeName          String            // denormalized
+  amount              Int               // in paisa
+  paymentMethod       PaymentMethod
+  type                TransactionType
+  status              TransactionStatus @default(PENDING)
+  sslTransactionId    String?
+  sslSessionKey       String?
+  refundReason        String?
+  refundedAt          DateTime?
+  receiptUrl          String?
+  metadata            Json?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  user                User              @relation(fields: [userId], references: [id])
+  vehicle             Vehicle           @relation(fields: [vehicleId], references: [id])
+  bridge              Bridge            @relation(fields: [bridgeId], references: [id])
 
   @@index([userId])
   @@index([vehicleId])
@@ -258,24 +302,33 @@ model Transaction {
   @@index([bridgeId, createdAt])
 }
 
+// ─────────────────────────────────────────
+// QR TOKENS (FastPass)
+// ─────────────────────────────────────────
+
 model QrToken {
-  id             String    @id @default(uuid())
-  userId         String
-  vehicleId      String
-  vehiclePlate   String
-  tokenData      String
-  expiresAt      DateTime
-  used           Boolean   @default(false)
-  usedAt         DateTime?
-  usedAtBridgeId String?
-  createdAt      DateTime  @default(now())
-  user           User      @relation(fields: [userId], references: [id])
-  vehicle        Vehicle   @relation(fields: [vehicleId], references: [id])
+  id              String   @id @default(uuid())
+  userId          String
+  vehicleId       String
+  vehiclePlate    String
+  tokenData       String   // encrypted payload
+  expiresAt       DateTime // now + 24 hours
+  used            Boolean  @default(false)
+  usedAt          DateTime?
+  usedAtBridgeId  String?
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id])
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id])
 
   @@index([userId])
   @@index([expiresAt])
   @@index([used])
 }
+
+// ─────────────────────────────────────────
+// ANNOUNCEMENTS
+// ─────────────────────────────────────────
 
 model Announcement {
   id              String           @id @default(uuid())
@@ -284,10 +337,10 @@ model Announcement {
   body            String
   bodyBn          String
   type            AnnouncementType @default(INFO)
-  targetBridgeIds String[]
+  targetBridgeIds String[]         // empty = all users
   isActive        Boolean          @default(true)
   expiresAt       DateTime?
-  createdById     String
+  createdById     String           // admin user id
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -295,16 +348,21 @@ model Announcement {
   @@index([createdAt])
 }
 
+// ─────────────────────────────────────────
+// PUSH SUBSCRIPTIONS (Web Push VAPID)
+// ─────────────────────────────────────────
+
 model PushSubscription {
-  id        String   @id @default(uuid())
-  userId    String
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
-  userAgent String?
-  platform  String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  userId      String
+  endpoint    String   @unique
+  p256dh      String
+  auth        String
+  userAgent   String?
+  platform    String?  // 'web' | 'android' | 'ios'
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

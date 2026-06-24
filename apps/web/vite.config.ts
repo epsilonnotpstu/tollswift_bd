@@ -10,6 +10,9 @@ export default defineConfig({
     }
   },
   server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'unsafe-none'
+    },
     proxy: {
       '/api': 'http://localhost:3001'
     }

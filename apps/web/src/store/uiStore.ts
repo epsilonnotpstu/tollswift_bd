@@ -21,9 +21,9 @@ export const useUIStore = create<UIState>()(
       setOnline: (isOnline) => set({ isOnline }),
       setTollSelection: (bridgeId, vehicleId, method) =>
         set((state) => ({
-          selectedBridgeId: bridgeId ?? state.selectedBridgeId,
-          selectedVehicleId: vehicleId ?? state.selectedVehicleId,
-          selectedPaymentMethod: method ?? state.selectedPaymentMethod
+          selectedBridgeId: bridgeId === undefined ? state.selectedBridgeId : bridgeId,
+          selectedVehicleId: vehicleId === undefined ? state.selectedVehicleId : vehicleId,
+          selectedPaymentMethod: method === undefined ? state.selectedPaymentMethod : method
         })),
       clearTollSelection: () =>
         set({ selectedBridgeId: null, selectedVehicleId: null, selectedPaymentMethod: null })

@@ -111,20 +111,27 @@ const main = async () => {
     }
   ] as const;
 
-  for (const item of announcements) {
-    await prisma.announcement.create({
-      data: {
-        ...item,
-        createdById: admin.id,
-        targetBridgeIds: [],
-        isActive: true
-      }
-    });
+  const announcementCount = await prisma.announcement.count();
+  if (announcementCount === 0) {
+    for (const item of announcements) {
+      await prisma.announcement.create({
+        data: {
+          ...item,
+          createdById: admin.id,
+          targetBridgeIds: [],
+          isActive: true
+        }
+      });
+    }
+    console.log('Seeded 3 announcements');
+  } else {
+    console.log(`Skipped announcements — ${announcementCount} already exist`);
   }
 };
 
 main()
   .then(async () => {
+    console.log('Seed completed successfully');
     await prisma.$disconnect();
   })
   .catch(async (error) => {

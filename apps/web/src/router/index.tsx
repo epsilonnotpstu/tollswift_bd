@@ -1,12 +1,35 @@
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { BottomNav } from '@/components/shared';
 import { useAuthStore } from '@/store/authStore';
+import { SplashPage } from '@/pages/user/auth/SplashPage';
+import { OnboardingPage } from '@/pages/user/auth/OnboardingPage';
+import { LoginPage } from '@/pages/user/auth/LoginPage';
+import { OTPPage } from '@/pages/user/auth/OTPPage';
+import { RegisterPage } from '@/pages/user/auth/RegisterPage';
+import { HomePage } from '@/pages/user/home/HomePage';
+import { WalletPage } from '@/pages/user/wallet/WalletPage';
+import { DepositPage } from '@/pages/user/wallet/DepositPage';
+import { VehiclesPage } from '@/pages/user/vehicle/VehiclesPage';
+import { AddVehiclePage } from '@/pages/user/vehicle/AddVehiclePage';
+import { VehicleDetailPage } from '@/pages/user/vehicle/VehicleDetailPage';
+import { SelectBridgePage } from '@/pages/user/toll/SelectBridgePage';
+import { SelectVehiclePage } from '@/pages/user/toll/SelectVehiclePage';
+import { PaymentMethodPage } from '@/pages/user/toll/PaymentMethodPage';
+import { PaymentConfirmPage } from '@/pages/user/toll/PaymentConfirmPage';
+import { PaymentSuccessPage } from '@/pages/user/toll/PaymentSuccessPage';
+import { HistoryPage } from '@/pages/user/history/HistoryPage';
+import { ReceiptPage } from '@/pages/user/history/ReceiptPage';
+import { MyQRPage } from '@/pages/user/qr/MyQRPage';
+import { ScanPage } from '@/pages/user/qr/ScanPage';
+import { ProfilePage } from '@/pages/user/profile/ProfilePage';
+import { NotificationSettingsPage } from '@/pages/user/profile/NotificationSettingsPage';
 
 const Page = ({ title }: { title: string }) => (
   <main className="min-h-screen bg-bg px-5 py-8 font-bengali text-text-primary">
     <section className="mx-auto flex max-w-md flex-col gap-3">
       <div className="text-sm font-semibold text-primary">TollBD</div>
       <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="text-sm text-text-secondary">এই পেজের পূর্ণ UI পরের implementation prompt-এ যুক্ত হবে।</p>
+      <p className="text-sm text-text-secondary">এই admin screen পরের prompt-এ পূর্ণ করা হবে।</p>
     </section>
   </main>
 );
@@ -25,35 +48,50 @@ const AdminRoute = () => {
   return user?.role === 'ADMIN' ? <Outlet /> : <Navigate to="/home" replace />;
 };
 
+const UserLayout = () => (
+  <div className="min-h-screen bg-bg text-text-primary">
+    <Outlet />
+    <BottomNav />
+  </div>
+);
+
 const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/splash" replace /> },
-  { path: '/splash', element: <Page title="Splash" /> },
-  { path: '/onboarding', element: <Page title="Onboarding" /> },
-  { path: '/login', element: <Page title="Login" /> },
-  { path: '/otp', element: <Page title="OTP Verification" /> },
-  { path: '/register', element: <Page title="Register" /> },
+  { path: '/splash', element: <SplashPage /> },
+  { path: '/onboarding', element: <OnboardingPage /> },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/otp', element: <OTPPage /> },
+  { path: '/register', element: <RegisterPage /> },
   { path: '/admin/login', element: <Page title="Admin Login" /> },
   {
     element: <ProtectedRoute />,
     children: [
-      { path: '/home', element: <Page title="Home" /> },
-      { path: '/wallet', element: <Page title="Wallet" /> },
-      { path: '/wallet/deposit', element: <Page title="Deposit" /> },
-      { path: '/vehicles', element: <Page title="Vehicles" /> },
-      { path: '/vehicles/add', element: <Page title="Add Vehicle" /> },
-      { path: '/vehicles/:id', element: <Page title="Vehicle Detail" /> },
+      {
+        element: <UserLayout />,
+        children: [
+          { path: '/home', element: <HomePage /> },
+          { path: '/wallet', element: <WalletPage /> },
+          { path: '/vehicles', element: <VehiclesPage /> },
+          { path: '/history', element: <HistoryPage /> },
+          { path: '/qr', element: <MyQRPage /> },
+          { path: '/profile', element: <ProfilePage /> }
+        ]
+      },
+      { path: '/wallet/deposit', element: <DepositPage /> },
+      { path: '/wallet/deposit/success', element: <DepositPage /> },
+      { path: '/vehicles/add', element: <AddVehiclePage /> },
+      { path: '/vehicles/:id', element: <VehicleDetailPage /> },
       { path: '/toll', element: <Navigate to="/toll/select-bridge" replace /> },
-      { path: '/toll/select-bridge', element: <Page title="Select Bridge" /> },
-      { path: '/toll/select-vehicle', element: <Page title="Select Vehicle" /> },
-      { path: '/toll/payment-method', element: <Page title="Payment Method" /> },
-      { path: '/toll/confirm', element: <Page title="Confirm Payment" /> },
-      { path: '/toll/success', element: <Page title="Payment Success" /> },
-      { path: '/history', element: <Page title="History" /> },
-      { path: '/history/:id', element: <Page title="Receipt" /> },
-      { path: '/qr', element: <Page title="My QR" /> },
-      { path: '/qr/scan', element: <Page title="QR Scan" /> },
-      { path: '/profile', element: <Page title="Profile" /> },
-      { path: '/profile/settings', element: <Page title="Settings" /> }
+      { path: '/toll/select-bridge', element: <SelectBridgePage /> },
+      { path: '/toll/vehicle', element: <SelectVehiclePage /> },
+      { path: '/toll/select-vehicle', element: <SelectVehiclePage /> },
+      { path: '/toll/method', element: <PaymentMethodPage /> },
+      { path: '/toll/payment-method', element: <PaymentMethodPage /> },
+      { path: '/toll/confirm', element: <PaymentConfirmPage /> },
+      { path: '/toll/success', element: <PaymentSuccessPage /> },
+      { path: '/history/:id', element: <ReceiptPage /> },
+      { path: '/qr/scan', element: <ScanPage /> },
+      { path: '/profile/settings', element: <NotificationSettingsPage /> }
     ]
   },
   {
@@ -67,7 +105,7 @@ const router = createBrowserRouter([
       { path: '/admin/bridges', element: <Page title="Admin Bridges" /> },
       { path: '/admin/toll-rates', element: <Page title="Admin Toll Rates" /> },
       { path: '/admin/transactions', element: <Page title="Admin Transactions" /> },
-      { path: '/admin/scanner', element: <Page title="Admin Scanner" /> },
+      { path: '/admin/scanner', element: <ScanPage /> },
       { path: '/admin/announcements', element: <Page title="Admin Announcements" /> }
     ]
   },

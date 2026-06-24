@@ -1,0 +1,14 @@
+{
+  "name": "TollBD",
+  "short_name": "TollBD",
+  "theme_color": "#1B4FDB",
+  "background_color": "#1B4FDB",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    { "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
