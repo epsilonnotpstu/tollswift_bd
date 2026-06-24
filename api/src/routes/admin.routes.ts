@@ -17,6 +17,7 @@ export const adminRoutes = Router();
 adminRoutes.use(requireAdmin);
 adminRoutes.get('/dashboard/stats', adminController.dashboardStats);
 adminRoutes.get('/users', adminController.getUsers);
+adminRoutes.get('/users/:id', adminController.getUserById);
 adminRoutes.patch('/users/:id/block', validate(blockUserSchema), adminController.blockUser);
 adminRoutes.get('/stats/revenue', adminController.revenueStats);
 

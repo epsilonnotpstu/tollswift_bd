@@ -1,15 +1,20 @@
 import { FuelType, VehicleCategory, VehicleType } from '@prisma/client';
 import { z } from 'zod';
 
-const brtaClassic = /^[A-Z]+-[A-Z]+-\d{2}-\d{3,4}$/;
-const dhakaMetro = /^\d{2}[A-Z]\d{4}$/;
+// BRTA formats: DHAKA-GA-11-1234 / DHAKA-A-11-1234 / 11G1234 / 11GA1234 / METRO-GA-11-12345 etc.
+const brtaClassic = /^[A-Z]{2,15}-[A-Z]{1,3}-\d{2}-\d{3,5}$/;
+const dhakaMetro  = /^\d{2}[A-Z]{1,3}\d{3,5}$/;
+// Fallback: any plate-like string (letters, digits, hyphens, spaces) 3–30 chars
+const genericPlate = /^[A-Z0-9][A-Z0-9\s-]{1,29}$/;
 
 const registrationNumber = z
   .string()
   .trim()
-  .transform((value) => value.toUpperCase())
-  .refine((value) => brtaClassic.test(value) || dhakaMetro.test(value), {
-    message: 'Invalid BRTA registration number format'
+  .min(3, 'রেজিস্ট্রেশন নম্বর কমপক্ষে ৩ অক্ষর হতে হবে')
+  .max(30, 'রেজিস্ট্রেশন নম্বর সর্বোচ্চ ৩০ অক্ষর হতে পারবে')
+  .transform((value) => value.toUpperCase().trim())
+  .refine((value) => brtaClassic.test(value) || dhakaMetro.test(value) || genericPlate.test(value), {
+    message: 'সঠিক রেজিস্ট্রেশন নম্বর দিন (যেমন: DHAKA-GA-11-1234)'
   });
 
 const vehicleBase = z.object({

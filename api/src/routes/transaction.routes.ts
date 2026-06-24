@@ -6,4 +6,5 @@ export const transactionRoutes = Router();
 
 transactionRoutes.use(requireAuth);
 transactionRoutes.get('/', controller.getMyTransactions);
+transactionRoutes.get('/:id/receipt', controller.downloadReceipt);
 transactionRoutes.get('/:id', controller.getTransaction);

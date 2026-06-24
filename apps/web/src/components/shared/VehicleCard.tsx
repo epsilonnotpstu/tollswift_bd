@@ -27,19 +27,32 @@ export const VehicleCard = ({ vehicle, onTap, isSelected, showStatus = true, sho
     <button
       type="button"
       onClick={onTap}
-      className={cn('flex w-full items-center gap-3 rounded-app border bg-surface p-4 text-left shadow-sm transition active:scale-[0.99]', isSelected ? 'border-primary bg-primary-50' : 'border-border')}
+      className={cn(
+        'flex w-full items-center gap-4 rounded-2xl border bg-surface p-4 text-left shadow-sm transition active:scale-[0.98]',
+        isSelected ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20' : 'border-border/60 hover:border-border'
+      )}
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary">
+      <span className={cn(
+        'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl',
+        isSelected ? 'bg-primary text-white' : 'bg-primary/10 text-primary'
+      )}>
         <Icon className="h-6 w-6" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate font-mono text-sm font-bold text-text-primary">{vehicle.registrationNumber}</span>
-        <span className="mt-0.5 block truncate text-xs text-text-secondary">{vehicle.ownerName} · Category {vehicle.vehicleCategory}</span>
+        <span className="mt-0.5 block truncate text-xs text-text-muted">{vehicle.ownerName}</span>
         <span className="mt-2 flex flex-wrap items-center gap-2">
-          {showStatus ? <StatusBadge status={vehicle.status} size="sm" /> : null}
-          {showTollAmount !== undefined ? <span className="text-xs font-bold text-primary">{formatBDT(showTollAmount)}</span> : null}
+          {showStatus && <StatusBadge status={vehicle.status} size="sm" />}
+          {showTollAmount !== undefined && (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">{formatBDT(showTollAmount)}</span>
+          )}
         </span>
       </span>
+      {isSelected && (
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary">
+          <span className="h-2 w-2 rounded-full bg-white" />
+        </span>
+      )}
     </button>
   );
 };

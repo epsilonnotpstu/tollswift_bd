@@ -45,9 +45,9 @@ export const register = async (data: { email: string; password: string; fullName
 
   const code = generateOTP();
   await saveOTP(user.id, code);
-  await sendOTPEmail(user.email, code, user.fullName);
+  const emailResult = await sendOTPEmail(user.email, code, user.fullName);
 
-  return { userId: user.id, email: user.email };
+  return { userId: user.id, email: user.email, ...(emailResult.devCode ? { devCode: emailResult.devCode } : {}) };
 };
 
 export const loginWithEmail = async (email: string, pass: string) => {
@@ -92,9 +92,9 @@ export const sendEmailOTP = async (email: string) => {
 
   const code = generateOTP();
   await saveOTP(user.id, code);
-  await sendOTPEmail(user.email, code, user.fullName);
+  const emailResult = await sendOTPEmail(user.email, code, user.fullName);
 
-  return { email: user.email };
+  return { email: user.email, ...(emailResult.devCode ? { devCode: emailResult.devCode } : {}) };
 };
 
 export const verifyEmailOTP = async (email: string, code: string) => {

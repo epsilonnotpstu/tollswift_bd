@@ -28,7 +28,23 @@ export const getUsers = (params?: { search?: string; status?: string; page?: num
   return apiClient.get('/admin/users', { params }).then(unwrap<Paginated<AdminUser>>);
 };
 
-export const blockUser = (id: string, blocked: boolean) => apiClient.patch(`/admin/users/${id}/block`, { blocked }).then(unwrap<AdminUser>);
+export const getUserById = (id: string) => apiClient.get(`/admin/users/${id}`).then(unwrap<AdminUser & {
+  vehicles: Array<{ id: string; registrationNumber: string; vehicleType: string; vehicleCategory: string; status: string; createdAt: string }>;
+  transactions: Array<{ id: string; amount: number; bridgeName: string; vehiclePlate: string; status: string; paymentMethod: string; createdAt: string }>;
+}>);
+
+export interface PaginatedVehicles { items: Vehicle[]; total: number; page: number; limit: number; }
+export const getAllVehicles = (params?: { status?: string; page?: number; limit?: number }) =>
+  apiClient.get('/admin/vehicles', { params }).then(unwrap<PaginatedVehicles>);
+
+export const blockUser = (id: string, action: 'block' | 'unblock') =>
+  apiClient.patch(`/admin/users/${id}/block`, { blocked: action === 'block' }).then(unwrap<AdminUser>);
+
+export const createBridge = (data: Omit<BridgeWithRate, 'id' | 'createdAt' | 'updatedAt' | 'tollRate'>) =>
+  apiClient.post('/admin/bridges', data).then(unwrap<BridgeWithRate>);
+
+export const setBridgeStatus = (id: string, status: string) =>
+  apiClient.patch(`/admin/bridges/${id}/status`, { status }).then(unwrap<BridgeWithRate>);
 
 export const getPendingVehicles = () => apiClient.get('/admin/vehicles/pending').then(unwrap<Vehicle[]>);
 

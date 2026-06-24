@@ -2,7 +2,7 @@ import { apiClient, unwrap } from './client';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types/auth.types';
 
 export const sendOTP = (email: string) => {
-  return apiClient.post('/auth/otp/send', { email }).then(unwrap<{ email: string }>);
+  return apiClient.post('/auth/otp/send', { email }).then(unwrap<{ email: string; devCode?: string }>);
 };
 
 export const verifyOTP = (email: string, code: string) => {

@@ -23,6 +23,7 @@ export interface Vehicle {
   brtaVerified?: boolean | null;
   brtaVerifiedAt?: string | null;
   brtaData?: unknown;
+  owner?: { id: string; fullName: string; email: string; phone?: string | null } | null;
 }
 
 export interface CreateVehicleRequest {
