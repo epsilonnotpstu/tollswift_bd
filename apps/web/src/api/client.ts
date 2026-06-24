@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
-interface ApiEnvelope<T> {
+export interface ApiEnvelope<T> {
   success: boolean;
   data: T;
   message: string | null;
@@ -56,3 +56,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(new Error(message));
   }
 );
+
+export const unwrap = <T>(response: { data: ApiEnvelope<T> }) => response.data.data;

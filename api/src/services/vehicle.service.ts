@@ -82,7 +82,7 @@ export const deleteVehicle = async (id: string, userId: string) => {
   if (!vehicle || vehicle.ownerId !== userId) {
     throw new AppError('Vehicle not found', 404, 'VEHICLE_NOT_FOUND');
   }
-  if (![VehicleStatus.PENDING, VehicleStatus.REJECTED].includes(vehicle.status)) {
+  if (vehicle.status !== VehicleStatus.PENDING && vehicle.status !== VehicleStatus.REJECTED) {
     throw new AppError('Only pending or rejected vehicles can be deleted', 400, 'VEHICLE_NOT_DELETABLE');
   }
 
