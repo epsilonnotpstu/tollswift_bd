@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ArrowDownLeft, Copy, Download, RotateCcw, X } from 'lucide-react';
+import { ArrowDownLeft, CheckCircle, Copy, Download, RotateCcw, X } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { getAllTransactions, refundTransaction } from '@/api/admin.api';
+import { getAllTransactions, refundTransaction, approveTransaction } from '@/api/admin.api';
 import { Transaction, TransactionStatus } from '@/types/transaction.types';
 import { DataTable, Column } from '@/components/admin';
 import { formatBDT, formatDateTime } from '@/utils/format';
@@ -35,11 +35,23 @@ export const AdminTransactionsPage = () => {
   const [refundReason, setRefundReason] = useState('');
   const [refundAmt, setRefundAmt] = useState('');
   const [detail, setDetail] = useState<Transaction | null>(null);
+  const [approving, setApproving] = useState<Transaction | null>(null);
+  const [approveReason, setApproveReason] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-transactions', statusFilter, page],
     queryFn: () => getAllTransactions({ status: statusFilter || undefined, page, limit: 25 }),
     placeholderData: (prev) => prev
+  });
+
+  const approveMut = useMutation({
+    mutationFn: () => approveTransaction(approving!.id, approveReason),
+    onSuccess: () => {
+      toast.success('Transaction approved');
+      queryClient.invalidateQueries({ queryKey: ['admin-transactions'] });
+      setApproving(null); setApproveReason('');
+    },
+    onError: () => toast.error('Approval failed')
   });
 
   const refundMut = useMutation({
@@ -165,6 +177,12 @@ export const AdminTransactionsPage = () => {
                   <RotateCcw className="h-4 w-4" /> Process Refund
                 </button>
               )}
+              {detail.status === 'PENDING' && detail.type === 'TOLL_PAYMENT' && (
+                <button onClick={() => { setApproving(detail); setDetail(null); }}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700 transition">
+                  <CheckCircle className="h-4 w-4" /> Approve Payment
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -189,6 +207,33 @@ export const AdminTransactionsPage = () => {
               <button onClick={() => refundMut.mutate()} disabled={!refundReason || refundMut.isPending}
                 className="flex-1 rounded-xl bg-amber-500 py-3 text-sm font-bold text-white disabled:opacity-50">
                 {refundMut.isPending ? 'Processing…' : 'Confirm Refund'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {approving && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <CheckCircle className="h-6 w-6 text-emerald-600" />
+            </div>
+            <h2 className="text-center font-bold text-gray-900">Approve Payment</h2>
+            <p className="mt-1 text-center text-sm text-gray-500">{formatBDT(approving.amount)} · {approving.bridgeName}</p>
+            <p className="mt-2 text-center text-xs text-gray-400">Payment method: {approving.paymentMethod}</p>
+            <div className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-700">
+              Wallet deduction হবে না। এটি একটি manual override — admin দায়িত্ব নিচ্ছেন।
+            </div>
+            <div className="mt-4">
+              <input value={approveReason} onChange={(e) => setApproveReason(e.target.value)} placeholder="Approval reason (required)"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" />
+            </div>
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => { setApproving(null); setApproveReason(''); }} className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-600">Cancel</button>
+              <button onClick={() => approveMut.mutate()} disabled={approveReason.length < 3 || approveMut.isPending}
+                className="flex-1 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
+                {approveMut.isPending ? 'Approving…' : 'Approve'}
               </button>
             </div>
           </div>

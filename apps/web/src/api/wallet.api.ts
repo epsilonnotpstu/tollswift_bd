@@ -20,6 +20,9 @@ export interface DepositSession {
   transactionId: string;
   amount: number;
   amountTaka: number;
+  isMock?: boolean;
+  mockTranId?: string;
+  mockAmount?: number;
 }
 
 export const getWallet = () => apiClient.get('/wallet').then(unwrap<WalletResponse>);
@@ -31,3 +34,6 @@ export const getTransactions = (page = 1, limit = 20) => {
 export const initDeposit = (amount: number, method: 'SSLCOMMERZ' | 'BKASH' | 'NAGAD' | 'CARD' = 'SSLCOMMERZ') => {
   return apiClient.post('/wallet/deposit/init', { amount, method }).then(unwrap<DepositSession>);
 };
+
+export const completeMockDeposit = (transactionId: string, amount: number) =>
+  apiClient.post('/wallet/deposit/mock-complete', { transactionId, amount }).then(unwrap<{ transactionId: string; credited: boolean }>);

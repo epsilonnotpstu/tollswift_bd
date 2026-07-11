@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Bell, Info, Megaphone, Plus, TriangleAlert, Wrench, X } from 'lucide-react';
+import { Bell, Info, Megaphone, Pencil, Plus, Trash2, TriangleAlert, Wrench, X } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { createAnnouncement, getAnnouncements, Announcement } from '@/api/admin.api';
+import { createAnnouncement, deleteAnnouncement, getAnnouncements, updateAnnouncement, Announcement } from '@/api/admin.api';
 import { formatDateTime } from '@/utils/format';
 
 type AnnouncementType = 'INFO' | 'WARNING' | 'MAINTENANCE';
@@ -20,6 +20,8 @@ export const AdminAnnouncementsPage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [filterType, setFilterType] = useState<AnnouncementType | ''>('');
   const [form, setForm] = useState(EMPTY);
+  const [editTarget, setEditTarget] = useState<Announcement | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Announcement | null>(null);
 
   const { data: announcements, isLoading } = useQuery({
     queryKey: ['admin-announcements', filterType],
@@ -42,7 +44,52 @@ export const AdminAnnouncementsPage = () => {
     onError: () => toast.error('Failed to create announcement')
   });
 
+  const updateMut = useMutation({
+    mutationFn: () => updateAnnouncement(editTarget!.id, {
+      title: form.title, titleBn: form.titleBn,
+      body: form.body, bodyBn: form.bodyBn,
+      type: form.type, targetBridgeIds: form.targetBridgeIds,
+      expiresAt: form.expiresAt || undefined
+    }),
+    onSuccess: () => {
+      toast.success('Announcement updated');
+      queryClient.invalidateQueries({ queryKey: ['admin-announcements'] });
+      setEditTarget(null);
+      setForm(EMPTY);
+    },
+    onError: () => toast.error('Failed to update announcement')
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: () => deleteAnnouncement(deleteTarget!.id),
+    onSuccess: () => {
+      toast.success('Announcement deleted');
+      queryClient.invalidateQueries({ queryKey: ['admin-announcements'] });
+      setDeleteTarget(null);
+    },
+    onError: () => toast.error('Failed to delete announcement')
+  });
+
+  const openEdit = (a: Announcement) => {
+    setForm({
+      title: a.title, titleBn: a.titleBn,
+      body: a.body, bodyBn: a.bodyBn,
+      type: a.type as AnnouncementType,
+      targetBridgeIds: a.targetBridgeIds,
+      expiresAt: a.expiresAt ? a.expiresAt.slice(0, 16) : ''
+    });
+    setEditTarget(a);
+  };
+
+  const closeForm = () => {
+    setShowCreate(false);
+    setEditTarget(null);
+    setForm(EMPTY);
+  };
+
   const filtered = (announcements ?? []).filter((a) => !filterType || a.type === filterType);
+  const isFormOpen = showCreate || editTarget !== null;
+  const isEditing = editTarget !== null;
 
   return (
     <div className="space-y-5">
@@ -95,6 +142,16 @@ export const AdminAnnouncementsPage = () => {
                       {a.titleBn && <p className="font-bengali text-xs text-gray-400">{a.titleBn}</p>}
                     </div>
                   </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => openEdit(a)}
+                      className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => setDeleteTarget(a)}
+                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-3 text-sm text-gray-600 line-clamp-2">{a.body}</p>
                 {a.bodyBn && <p className="font-bengali mt-1 text-xs text-gray-400 line-clamp-1">{a.bodyBn}</p>}
@@ -108,15 +165,15 @@ export const AdminAnnouncementsPage = () => {
         </div>
       )}
 
-      {showCreate && (
+      {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-primary" />
-                <h2 className="font-bold text-gray-900">New Announcement</h2>
+                <h2 className="font-bold text-gray-900">{isEditing ? 'Edit Announcement' : 'New Announcement'}</h2>
               </div>
-              <button onClick={() => setShowCreate(false)}><X className="h-5 w-5 text-gray-400" /></button>
+              <button onClick={closeForm}><X className="h-5 w-5 text-gray-400" /></button>
             </div>
 
             <div className="space-y-3">
@@ -145,10 +202,38 @@ export const AdminAnnouncementsPage = () => {
             </div>
 
             <div className="mt-5 flex gap-3">
-              <button onClick={() => setShowCreate(false)} className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-600">Cancel</button>
-              <button onClick={() => createMut.mutate()} disabled={!form.title || !form.body || createMut.isPending}
-                className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-white disabled:opacity-50">
-                {createMut.isPending ? 'Posting…' : 'Post Announcement'}
+              <button onClick={closeForm} className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-600">Cancel</button>
+              {isEditing ? (
+                <button onClick={() => updateMut.mutate()} disabled={!form.title || !form.body || updateMut.isPending}
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-white disabled:opacity-50">
+                  {updateMut.isPending ? 'Saving…' : 'Save Changes'}
+                </button>
+              ) : (
+                <button onClick={() => createMut.mutate()} disabled={!form.title || !form.body || createMut.isPending}
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-white disabled:opacity-50">
+                  {createMut.isPending ? 'Posting…' : 'Post Announcement'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mx-auto">
+              <Trash2 className="h-6 w-6 text-red-600" />
+            </div>
+            <h2 className="mt-4 text-center font-bold text-gray-900">Delete Announcement?</h2>
+            <p className="mt-1 text-center text-sm text-gray-500">
+              <span className="font-semibold">"{deleteTarget.title}"</span> permanently delete হয়ে যাবে। এটা undo করা যাবে না।
+            </p>
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-600">Cancel</button>
+              <button onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}
+                className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50">
+                {deleteMut.isPending ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>

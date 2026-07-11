@@ -27,3 +27,5 @@ export const announcementSchema = z.object({
   targetBridgeIds: z.array(z.string().uuid()).default([]),
   expiresAt: z.string().datetime().optional()
 });
+
+export const updateAnnouncementSchema = announcementSchema.partial();

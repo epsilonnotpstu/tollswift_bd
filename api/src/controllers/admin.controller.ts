@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Prisma, TransactionType, UserStatus } from '@prisma/client';
 import { prisma } from '../config/database';
-import { announcementSchema, revenueQuerySchema, usersQuerySchema } from '../schemas/admin.schema';
+import { announcementSchema, updateAnnouncementSchema, revenueQuerySchema, usersQuerySchema } from '../schemas/admin.schema';
 import { success } from '../utils/response';
 
 const startOfToday = () => {
@@ -154,4 +154,20 @@ export const createAnnouncement = async (req: Request, res: Response) => {
     }
   });
   return success(res, announcement, 'Announcement created', 201);
+};
+
+export const updateAnnouncement = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const body = updateAnnouncementSchema.parse(req.body);
+  const announcement = await prisma.announcement.update({
+    where: { id },
+    data: { ...body, expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined }
+  });
+  return success(res, announcement, 'Announcement updated');
+};
+
+export const deleteAnnouncement = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await prisma.announcement.delete({ where: { id } });
+  return success(res, null, 'Announcement deleted');
 };

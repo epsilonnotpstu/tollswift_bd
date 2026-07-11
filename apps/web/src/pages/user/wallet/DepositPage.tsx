@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { initDeposit } from '@/api/wallet.api';
+import { initDeposit, completeMockDeposit } from '@/api/wallet.api';
 import { AppBar, PaymentMethodCard } from '@/components/shared';
 import { PaymentMethod } from '@/types/transaction.types';
 
@@ -11,10 +11,22 @@ export const DepositPage = () => {
   const [amount, setAmount] = useState('500');
   const [method, setMethod] = useState<PaymentMethod>('SSLCOMMERZ');
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
   const mutation = useMutation({
     mutationFn: () => initDeposit(Number(amount), method as 'SSLCOMMERZ' | 'BKASH' | 'NAGAD' | 'CARD'),
-    onSuccess: (data) => {
-      window.location.href = data.gatewayUrl;
+    onSuccess: async (data) => {
+      if (data.isMock) {
+        try {
+          await completeMockDeposit(data.mockTranId ?? data.transactionId, data.mockAmount ?? data.amountTaka);
+          queryClient.invalidateQueries({ queryKey: ['wallet'] });
+          navigate(`/wallet/deposit/success?txId=${data.mockTranId ?? data.transactionId}`, { replace: true });
+        } catch {
+          toast.error('Deposit failed');
+        }
+      } else {
+        window.location.href = data.gatewayUrl;
+      }
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : 'Deposit failed')
   });

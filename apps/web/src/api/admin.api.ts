@@ -66,6 +66,9 @@ export const refundTransaction = (id: string, reason: string, amount?: number) =
   return apiClient.post(`/admin/transactions/${id}/refund`, { reason, amount }).then(unwrap<Transaction>);
 };
 
+export const approveTransaction = (id: string, reason: string) =>
+  apiClient.patch(`/admin/transactions/${id}/approve`, { reason }).then(unwrap<Transaction>);
+
 export const scanQR = (tokenData: string, bridgeId: string) => apiClient.post('/qr/scan', { tokenData, bridgeId }).then(unwrap<QRScanResponse>);
 
 export const getAnnouncements = (adminMode = false) =>
@@ -74,6 +77,12 @@ export const getAnnouncements = (adminMode = false) =>
 export const createAnnouncement = (data: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt' | 'createdById' | 'isActive'> & { expiresAt?: string }) => {
   return apiClient.post('/admin/announcements', data).then(unwrap<Announcement>);
 };
+
+export const updateAnnouncement = (id: string, data: Partial<Omit<Announcement, 'id' | 'createdAt' | 'updatedAt' | 'createdById'>>) =>
+  apiClient.patch(`/admin/announcements/${id}`, data).then(unwrap<Announcement>);
+
+export const deleteAnnouncement = (id: string) =>
+  apiClient.delete(`/admin/announcements/${id}`).then(unwrap<null>);
 
 export const broadcast = (payload: { title: string; body: string; icon?: string; data?: Record<string, unknown> }) => {
   return apiClient.post('/admin/notifications/broadcast', payload).then(unwrap<{ sent: number }>);

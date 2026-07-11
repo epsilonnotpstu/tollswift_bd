@@ -18,8 +18,11 @@ export interface SSLSessionParams {
 }
 
 const mockSession = (transactionId: string, amountTaka: number) => ({
-  gatewayUrl: `${env.API_BASE_URL}/api/v1/wallet/deposit/success?tran_id=${transactionId}&status=VALID&amount=${amountTaka}&mock=1`,
-  sessionKey: `mock_${transactionId}`
+  gatewayUrl: '',
+  sessionKey: `mock_${transactionId}`,
+  isMock: true as const,
+  mockTranId: transactionId,
+  mockAmount: amountTaka
 });
 
 export const createSession = async (params: SSLSessionParams) => {
