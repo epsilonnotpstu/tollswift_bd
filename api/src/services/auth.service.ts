@@ -113,8 +113,7 @@ export const verifyEmailOTP = async (email: string, code: string) => {
   return buildAuthResponse(user.id);
 };
 
-export const googleAuth = async (idToken: string) => {
-  const profile = await verifyGoogleToken(idToken);
+const upsertGoogleUser = async (profile: { email: string; name: string; googleId?: string; photoUrl?: string }) => {
   const user = await prisma.user.upsert({
     where: { email: profile.email.toLowerCase() },
     update: {
@@ -133,8 +132,18 @@ export const googleAuth = async (idToken: string) => {
       wallet: { create: { balance: 0 } }
     }
   });
-
   return buildAuthResponse(user.id);
+};
+
+export const googleAuth = async (idToken: string) => {
+  const profile = await verifyGoogleToken(idToken);
+  return upsertGoogleUser(profile);
+};
+
+export const googleAuthFromCode = async (code: string) => {
+  const { exchangeGoogleCode } = await import('./google.service');
+  const profile = await exchangeGoogleCode(code);
+  return upsertGoogleUser(profile);
 };
 
 export const refreshTokens = async (refreshToken: string) => {

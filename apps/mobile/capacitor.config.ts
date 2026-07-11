@@ -1,16 +1,17 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
-// DEV: set to true when testing on physical device (uses live server via IP)
-// PROD: set to false (uses bundled web dist)
-const DEV_MODE = true;
-const DEV_SERVER_IP = '10.143.177.1'; // your PC's local IP
+// DEV_MODE=true → app loads from live web server via ADB reverse tunnel (hot reload)
+// DEV_MODE=false → app uses bundled web/dist (standalone APK, no laptop needed)
+const DEV_MODE = false;
 
 const config: CapacitorConfig = {
   appId: 'com.tollbd.app',
   appName: 'TollBD',
   webDir: '../web/dist',
   server: DEV_MODE ? {
-    url: `http://${DEV_SERVER_IP}:5174`,
+    // ADB reverse maps phone's localhost → laptop's localhost
+    // Run: adb reverse tcp:5173 tcp:5173 && adb reverse tcp:3001 tcp:3001
+    url: 'http://localhost:5173',
     cleartext: true
   } : {
     androidScheme: 'https'

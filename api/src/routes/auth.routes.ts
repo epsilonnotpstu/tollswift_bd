@@ -14,6 +14,10 @@ import {
 
 export const authRoutes = Router();
 
+// Mobile Google OAuth redirect flow (no body validation needed — browser redirects)
+authRoutes.get('/google/redirect', controller.googleRedirect);
+authRoutes.get('/google/callback', controller.googleCallback);
+
 authRoutes.post('/register', authLimiter, validate(registerSchema), controller.register);
 authRoutes.post('/login', authLimiter, validate(loginSchema), controller.login);
 authRoutes.post('/otp/send', otpLimiter, validate(sendOTPSchema), controller.sendOTP);

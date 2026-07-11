@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
+import { getGoogleOAuthUrl } from '../services/google.service';
 import { success } from '../utils/response';
 
 export const register = async (req: Request, res: Response) => {
@@ -25,6 +26,31 @@ export const verifyOTP = async (req: Request, res: Response) => {
 export const googleAuth = async (req: Request, res: Response) => {
   const data = await authService.googleAuth(req.body.idToken);
   return success(res, data, 'Google login successful');
+};
+
+// Mobile OAuth redirect flow
+export const googleRedirect = (_req: Request, res: Response) => {
+  const url = getGoogleOAuthUrl();
+  res.redirect(url);
+};
+
+export const googleCallback = async (req: Request, res: Response) => {
+  const { code, error } = req.query;
+  if (error || !code) {
+    return res.redirect('tollbd://auth/callback?error=cancelled');
+  }
+  try {
+    const data = await authService.googleAuthFromCode(code as string);
+    const params = new URLSearchParams({
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      user: Buffer.from(JSON.stringify(data.user)).toString('base64')
+    });
+    return res.redirect(`tollbd://auth/callback?${params.toString()}`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Google auth failed';
+    return res.redirect(`tollbd://auth/callback?error=${encodeURIComponent(msg)}`);
+  }
 };
 
 export const refresh = async (req: Request, res: Response) => {
