@@ -4,11 +4,11 @@
   "type": "module",
   "scripts": {
     "build:web": "npm --prefix ../web run build",
-    "sync": "cap sync",
-    "sync:android": "JAVA_HOME=/usr/lib/jvm/java-17-openjdk npm run build:web && JAVA_HOME=/usr/lib/jvm/java-17-openjdk cap sync android",
+    "sync": "node node_modules/@capacitor/cli/bin/capacitor sync",
+    "sync:android": "JAVA_HOME=/usr/lib/jvm/java-17-openjdk npm run build:web && JAVA_HOME=/usr/lib/jvm/java-17-openjdk node node_modules/@capacitor/cli/bin/capacitor sync android",
     "android:debug": "npm run sync:android && cd android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleDebug",
     "android:install": "npm run sync:android && cd android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew installDebug",
-    "android:run": "npm run sync:android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk cap run android",
+    "android:run": "npm run sync:android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk ANDROID_HOME=/home/afrin/Android/Sdk node node_modules/@capacitor/cli/bin/capacitor run android",
     "open:android": "CAPACITOR_ANDROID_STUDIO_PATH=/opt/android-studio/bin/studio.sh cap open android",
     "open:ios": "cap open ios"
   },
@@ -25,7 +25,8 @@
     "@capacitor/push-notifications": "^6.0.2",
     "@capacitor/share": "^6.0.2",
     "@capacitor/splash-screen": "^6.0.2",
-    "@capacitor/status-bar": "^6.0.1"
+    "@capacitor/status-bar": "^6.0.1",
+    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4"
   },
   "devDependencies": {
     "typescript": "^5.5.2"

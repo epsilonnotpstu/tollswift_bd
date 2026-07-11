@@ -27,16 +27,30 @@ export const PaymentMethodCard = ({ method, isSelected, onClick, balance, isDisa
       type="button"
       disabled={isDisabled}
       onClick={onClick}
-      className={cn('flex w-full items-center gap-3 rounded-app border bg-surface p-4 text-left transition', isSelected ? 'border-primary bg-primary-50' : 'border-border', isDisabled ? 'cursor-not-allowed opacity-50' : 'active:scale-[0.99]')}
+      className={cn(
+        'flex w-full items-center gap-4 rounded-2xl border bg-surface p-4 text-left transition',
+        isSelected ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20' : 'border-border/60',
+        isDisabled ? 'cursor-not-allowed opacity-50' : 'active:scale-[0.98] hover:border-border'
+      )}
     >
-      <span className="flex h-11 w-11 items-center justify-center rounded-app bg-bg text-primary">
+      <span className={cn(
+        'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
+        isSelected ? 'bg-primary text-white' : 'bg-primary/10 text-primary'
+      )}>
         <Icon className="h-5 w-5" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-bengali text-sm font-bold text-text-primary">{item.name}</span>
-        <span className="block text-xs text-text-secondary">{method === 'WALLET' && balance !== undefined ? `Balance: ${formatBDT(balance)}` : item.subtitle}</span>
+        <span className="block text-xs text-text-muted">
+          {method === 'WALLET' && balance !== undefined ? `ব্যালেন্স: ${formatBDT(balance)}` : item.subtitle}
+        </span>
       </span>
-      <span className={cn('h-5 w-5 rounded-full border-2', isSelected ? 'border-primary bg-primary shadow-inner' : 'border-border')} />
+      <span className={cn(
+        'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition',
+        isSelected ? 'border-primary bg-primary' : 'border-border'
+      )}>
+        {isSelected && <span className="h-2 w-2 rounded-full bg-white" />}
+      </span>
     </button>
   );
 };

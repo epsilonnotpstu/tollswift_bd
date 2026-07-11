@@ -20,19 +20,46 @@ export const PaymentMethodPage = () => {
   return (
     <main className="min-h-screen bg-bg pb-6">
       <AppBar title="Payment Method" titleBn="পেমেন্ট পদ্ধতি" showBack />
-      <section className="space-y-4 px-5 py-5">
-        <div className="rounded-app border border-border bg-surface p-4 shadow-sm">
-          <p className="font-bengali text-sm font-bold">পেমেন্টের বিবরণ</p>
-          <div className="mt-3 space-y-2 text-sm">
-            <p className="flex justify-between"><span className="text-text-secondary">সেতু</span><span>{bridge.data?.nameBn}</span></p>
-            <p className="flex justify-between"><span className="text-text-secondary">গাড়ি</span><span>{vehicle.data?.registrationNumber}</span></p>
-            <p className="flex justify-between font-bold"><span>মোট</span><AmountDisplay amount={amount} colored /></p>
+      <section className="space-y-3.5 px-5 py-5">
+        {/* Summary card */}
+        <div className="rounded-2xl border border-border/60 bg-surface p-4 shadow-sm">
+          <p className="font-bengali text-xs font-semibold text-text-muted mb-3">পেমেন্টের বিবরণ</p>
+          <div className="space-y-2.5 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="font-bengali text-text-muted">সেতু</span>
+              <span className="font-bengali font-semibold text-text-primary">{bridge.data?.nameBn ?? '—'}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="font-bengali text-text-muted">গাড়ি</span>
+              <span className="font-mono font-semibold text-text-primary">{vehicle.data?.registrationNumber ?? '—'}</span>
+            </div>
+            <div className="flex items-center justify-between border-t border-border/50 pt-2.5">
+              <span className="font-bengali font-bold text-text-primary">মোট টোল</span>
+              <AmountDisplay amount={amount} size="md" colored />
+            </div>
           </div>
         </div>
+
+        <p className="font-bengali text-xs font-semibold text-text-muted">পেমেন্ট পদ্ধতি বেছে নিন</p>
+
         {(['WALLET', 'SSLCOMMERZ', 'BKASH', 'NAGAD'] as PaymentMethod[]).map((method) => (
-          <PaymentMethodCard key={method} method={method} balance={method === 'WALLET' ? wallet.balance : undefined} isDisabled={method === 'WALLET' && wallet.balance < amount} isSelected={selectedPaymentMethod === method} onClick={() => setTollSelection(undefined, undefined, method)} />
+          <PaymentMethodCard
+            key={method}
+            method={method}
+            balance={method === 'WALLET' ? wallet.balance : undefined}
+            isDisabled={method === 'WALLET' && wallet.balance < amount}
+            isSelected={selectedPaymentMethod === method}
+            onClick={() => setTollSelection(undefined, undefined, method)}
+          />
         ))}
-        <button disabled={!selectedPaymentMethod} onClick={() => navigate('/toll/confirm')} className="w-full rounded-app bg-primary py-4 font-bengali font-bold text-white disabled:opacity-50">নিশ্চিত করুন</button>
+
+        <button
+          disabled={!selectedPaymentMethod}
+          onClick={() => navigate('/toll/confirm')}
+          className="w-full rounded-2xl bg-primary py-4 font-bengali font-bold text-white shadow-lg shadow-primary/25 disabled:opacity-50 active:scale-[0.98] transition"
+        >
+          নিশ্চিত করুন →
+        </button>
       </section>
     </main>
   );

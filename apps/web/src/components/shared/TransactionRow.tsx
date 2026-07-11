@@ -17,21 +17,30 @@ export const TransactionRow = ({ transaction, onTap }: TransactionRowProps) => {
   const Icon = wallet ? (debit ? ArrowUpRight : ArrowDownLeft) : transaction.status === 'REFUNDED' ? RotateCcw : ReceiptText;
 
   return (
-    <button type="button" onClick={onTap} className="flex w-full items-center gap-3 border-b border-border bg-surface p-4 text-left last:border-b-0">
-      <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', debit ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600')}>
-        <Icon className="h-5 w-5" />
+    <button
+      type="button"
+      onClick={onTap}
+      className="flex w-full items-center gap-3 border-b border-border/50 bg-surface px-4 py-3.5 text-left transition last:border-b-0 active:bg-bg/60"
+    >
+      <span className={cn(
+        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl',
+        debit ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'
+      )}>
+        <Icon className="h-[18px] w-[18px]" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-text-primary">{wallet ? transaction.description : transaction.bridgeName}</span>
-        <span className="mt-0.5 block truncate text-xs text-text-secondary">
+        <span className="block truncate text-sm font-semibold text-text-primary">
+          {wallet ? transaction.description : transaction.bridgeName}
+        </span>
+        <span className="mt-0.5 block truncate text-xs text-text-muted">
           {wallet ? formatDateTime(transaction.createdAt) : `${transaction.vehiclePlate} · ${formatDateTime(transaction.createdAt)}`}
         </span>
       </span>
-      <span className="text-right">
-        <span className={cn('block text-sm font-bold', debit ? 'text-red-600' : 'text-green-600')}>
-          {debit ? '-' : '+'}{formatBDT(transaction.amount)}
+      <span className="shrink-0 text-right">
+        <span className={cn('block text-sm font-bold tabular-nums', debit ? 'text-red-500' : 'text-emerald-600')}>
+          {debit ? '−' : '+'}{formatBDT(transaction.amount)}
         </span>
-        {!wallet ? <StatusBadge status={transaction.status} size="sm" /> : null}
+        {!wallet && <StatusBadge status={transaction.status} size="sm" />}
       </span>
     </button>
   );

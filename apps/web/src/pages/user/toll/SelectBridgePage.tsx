@@ -21,17 +21,49 @@ export const SelectBridgePage = () => {
   return (
     <main className="min-h-screen bg-bg pb-6">
       <AppBar title="Select Bridge" titleBn="সেতু বেছে নিন" showBack />
-      <section className="sticky top-14 z-20 border-b border-border bg-surface px-5 py-4">
-        <div className="flex items-center gap-2 rounded-full border border-border bg-bg px-4 py-3">
-          <Search className="h-4 w-4 text-text-muted" />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="সেতুর নাম খুঁজুন" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+      <section className="sticky top-[56px] z-20 border-b border-border/50 bg-surface/95 px-5 py-3.5 backdrop-blur-xl">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-border/60 bg-bg px-4 py-2.5 focus-within:border-primary/40 transition">
+          <Search className="h-4 w-4 shrink-0 text-text-muted" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="সেতুর নাম বা জেলা খুঁজুন"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted"
+          />
         </div>
-        <div className="mt-3 flex gap-2 overflow-x-auto">
-          {['ALL', 'EXPRESSWAY', 'NATIONAL', 'LOCAL'].map((item) => <button key={item} onClick={() => setCategory(item)} className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold ${category === item ? 'bg-primary text-white' : 'border border-border bg-surface text-text-secondary'}`}>{item}</button>)}
+        <div className="mt-3 flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
+          {[['ALL', 'সব'], ['EXPRESSWAY', 'এক্সপ্রেসওয়ে'], ['NATIONAL', 'জাতীয়'], ['LOCAL', 'স্থানীয়']].map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => setCategory(val)}
+              className={`shrink-0 rounded-full px-3.5 py-1.5 font-bengali text-xs font-bold transition ${category === val ? 'bg-primary text-white shadow-sm' : 'border border-border/60 bg-surface text-text-secondary hover:border-border'}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </section>
       <section className="space-y-3 px-5 py-4">
-        {bridges.isLoading ? <SkeletonList /> : filtered.map((bridge) => <BridgeCard key={bridge.id} bridge={bridge} onTap={() => { setTollSelection(bridge.id, null, null); navigate('/toll/vehicle'); }} />)}
+        {bridges.isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-24 animate-pulse rounded-2xl bg-surface" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-surface px-6 py-12 text-center">
+            <p className="text-2xl">🌉</p>
+            <p className="mt-2 font-bengali text-sm text-text-muted">কোনো সেতু পাওয়া যায়নি</p>
+          </div>
+        ) : (
+          filtered.map((bridge) => (
+            <BridgeCard
+              key={bridge.id}
+              bridge={bridge}
+              onTap={() => { setTollSelection(bridge.id, null, null); navigate('/toll/vehicle'); }}
+            />
+          ))
+        )}
       </section>
     </main>
   );

@@ -30,3 +30,14 @@ export const depositSuccess = async (req: Request, res: Response) => {
 export const depositFailed = async (_req: Request, res: Response) => {
   return res.redirect(`${env.FRONTEND_URL}/wallet/deposit/failed`);
 };
+
+export const completeMockDeposit = async (req: Request, res: Response) => {
+  const { transactionId, amount } = req.body;
+  const result = await walletService.handleDepositSuccess({
+    tran_id: transactionId,
+    status: 'VALID',
+    amount,
+    mock: 1
+  });
+  return success(res, result);
+};

@@ -12,6 +12,10 @@ export const refundSchema = z.object({
   amount: z.coerce.number().int().positive().optional()
 });
 
+export const approveTransactionSchema = z.object({
+  reason: z.string().min(3).max(500)
+});
+
 export const tollCalculateSchema = z.object({
   bridgeId: z.string().uuid(),
   category: z.nativeEnum(VehicleCategory)
